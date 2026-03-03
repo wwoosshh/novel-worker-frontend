@@ -687,6 +687,7 @@ function MacrosTab({ novelId }: { novelId: string }) {
   const [editTarget, setEditTarget] = useState<Macro | null>(null);
   const [formLabel, setFormLabel] = useState("");
   const [formContent, setFormContent] = useState("");
+  const [formShortcut, setFormShortcut] = useState("");
   const [formSaving, setFormSaving] = useState(false);
 
   // Delete dialog
@@ -713,6 +714,7 @@ function MacrosTab({ novelId }: { novelId: string }) {
     setEditTarget(null);
     setFormLabel("");
     setFormContent("");
+    setFormShortcut("");
     setDialogOpen(true);
   };
 
@@ -720,6 +722,7 @@ function MacrosTab({ novelId }: { novelId: string }) {
     setEditTarget(macro);
     setFormLabel(macro.label);
     setFormContent(macro.content);
+    setFormShortcut(macro.shortcut ?? "");
     setDialogOpen(true);
   };
 
@@ -727,17 +730,16 @@ function MacrosTab({ novelId }: { novelId: string }) {
     if (!formLabel.trim() || !formContent.trim()) return;
     setFormSaving(true);
     try {
+      const payload = {
+        label: formLabel.trim(),
+        content: formContent,
+        shortcut: formShortcut || undefined,
+      };
       if (editTarget) {
-        const res = await macrosApi.update(novelId, editTarget.id, {
-          label: formLabel.trim(),
-          content: formContent,
-        });
+        const res = await macrosApi.update(novelId, editTarget.id, payload);
         setMacros((prev) => prev.map((m) => (m.id === editTarget.id ? res.data : m)));
       } else {
-        const res = await macrosApi.create(novelId, {
-          label: formLabel.trim(),
-          content: formContent,
-        });
+        const res = await macrosApi.create(novelId, payload);
         setMacros((prev) => [...prev, res.data]);
       }
       setDialogOpen(false);
@@ -811,9 +813,23 @@ function MacrosTab({ novelId }: { novelId: string }) {
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium mb-0.5" style={{ color: "#1A1814" }}>
-                  {macro.label}
-                </p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-sm font-medium" style={{ color: "#1A1814" }}>
+                    {macro.label}
+                  </p>
+                  {macro.shortcut && (
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded-sm font-mono"
+                      style={{
+                        color: "#6B6560",
+                        backgroundColor: "#F5F1EB",
+                        border: "1px solid #E8E2D9",
+                      }}
+                    >
+                      {macro.shortcut.split("+").map((k) => k.charAt(0).toUpperCase() + k.slice(1)).join("+")}
+                    </span>
+                  )}
+                </div>
                 <p className="text-[11px] truncate" style={{ color: "#8A8478" }}>
                   {macro.content}
                 </p>
@@ -863,6 +879,46 @@ function MacrosTab({ novelId }: { novelId: string }) {
                 className="w-full h-9 px-3 text-sm rounded-sm outline-none"
                 style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
               />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
+                단축키
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  value={formShortcut ? formShortcut.split("+").map((k) => k.charAt(0).toUpperCase() + k.slice(1)).join("+") : ""}
+                  readOnly
+                  placeholder="클릭 후 키 입력"
+                  className="flex-1 h-9 px-3 text-sm rounded-sm outline-none cursor-pointer font-mono"
+                  style={{ border: "1px solid #E8E2D9", color: "#1A1814", backgroundColor: "#FDFBF7" }}
+                  onKeyDown={(e) => {
+                    e.preventDefault();
+                    if (e.key === "Escape") return;
+                    if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
+                    const parts: string[] = [];
+                    if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+                    if (e.altKey) parts.push("alt");
+                    if (e.shiftKey) parts.push("shift");
+                    parts.push(e.key.toLowerCase());
+                    setFormShortcut(parts.join("+"));
+                  }}
+                />
+                {formShortcut && (
+                  <button
+                    type="button"
+                    onClick={() => setFormShortcut("")}
+                    className="h-9 px-2 text-xs rounded-sm transition-colors"
+                    style={{ border: "1px solid #E8E2D9", color: "#8A8478" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#DC2626")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <p className="text-[10px] mt-1" style={{ color: "#8A8478" }}>
+                입력란을 클릭한 뒤 원하는 키 조합을 누르세요 (예: Ctrl+R)
+              </p>
             </div>
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>

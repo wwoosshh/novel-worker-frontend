@@ -80,6 +80,7 @@ export interface Macro {
   novel_id: string;
   label: string;
   content: string;
+  shortcut?: string;
   created_at: string;
 }
 
@@ -204,14 +205,14 @@ export const macrosApi = {
     return apiFetch<{ data: Macro[] }>(`/api/novels/${novelId}/macros`);
   },
 
-  create(novelId: string, data: { label: string; content: string }) {
+  create(novelId: string, data: { label: string; content: string; shortcut?: string }) {
     return apiFetch<{ data: Macro }>(`/api/novels/${novelId}/macros`, {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  update(novelId: string, id: string, data: { label: string; content: string }) {
+  update(novelId: string, id: string, data: { label: string; content: string; shortcut?: string }) {
     return apiFetch<{ data: Macro }>(`/api/novels/${novelId}/macros/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),

@@ -7,7 +7,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { useAuth } from "@/hooks/useAuth";
-import { novelsApi, chaptersApi, type Novel, type Chapter } from "@/lib/api";
+import { novelsApi, chaptersApi, macrosApi, type Novel, type Chapter, type Macro } from "@/lib/api";
 import { ChapterSidebar } from "@/components/editor/ChapterSidebar";
 import { DbQuickPanel } from "@/components/editor/DbQuickPanel";
 import { NovelEditor } from "@/components/editor/NovelEditor";
@@ -34,6 +34,7 @@ export default function EditorWorkspacePage() {
 
   const [novel, setNovel] = useState<Novel | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [macros, setMacros] = useState<Macro[]>([]);
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [chapterTitle, setChapterTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -75,13 +76,15 @@ export default function EditorWorkspacePage() {
 
     async function load() {
       try {
-        const [novelRes, chaptersRes] = await Promise.all([
+        const [novelRes, chaptersRes, macrosRes] = await Promise.all([
           novelsApi.get(novelId),
           chaptersApi.list(novelId),
+          macrosApi.list(novelId),
         ]);
         setNovel(novelRes.data);
         const sorted = chaptersRes.data.sort((a, b) => a.number - b.number);
         setChapters(sorted);
+        setMacros(macrosRes.data);
       } catch (err) {
         console.error("Failed to load workspace:", err);
       } finally {
@@ -276,6 +279,7 @@ export default function EditorWorkspacePage() {
             lastSaved={lastSaved}
             isPublic={activeChapter?.is_public ?? false}
             onTogglePublish={togglePublish}
+            macros={macros}
           />
         </div>
 

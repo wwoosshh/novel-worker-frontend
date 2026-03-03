@@ -9,7 +9,7 @@ import { novelsApi, usersApi, type Novel, type Profile } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Plus, ChevronRight, BookOpen, Eye, Clock,
-  MoreHorizontal, PenLine, Archive, Settings, TrendingUp,
+  MoreHorizontal, PenLine, Settings, TrendingUp,
 } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -118,7 +118,6 @@ function NovelRow({ novel }: { novel: Novel }) {
               {[
                 { icon: <PenLine className="h-3.5 w-3.5" />,  label: "작업하기",  href: `/studio/${novel.id}` },
                 { icon: <Settings className="h-3.5 w-3.5" />, label: "소설 설정", href: `/studio/${novel.id}/settings` },
-                { icon: <Archive className="h-3.5 w-3.5" />,  label: "보관하기",  href: "#" },
               ].map((item) => (
                 <Link
                   key={item.label}

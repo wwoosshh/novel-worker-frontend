@@ -5,7 +5,7 @@ import type { Editor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
 import { EditorToolbar } from "./EditorToolbar";
 import { Eye, EyeOff } from "lucide-react";
-import type { Chapter } from "@/lib/api";
+import type { Chapter, Macro } from "@/lib/api";
 
 interface NovelEditorProps {
   editor: Editor | null;
@@ -17,6 +17,16 @@ interface NovelEditorProps {
   lastSaved: Date | null;
   isPublic: boolean;
   onTogglePublish: () => void;
+  macros?: Macro[];
+}
+
+function normalizeKeyEvent(e: KeyboardEvent): string {
+  const parts: string[] = [];
+  if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+  if (e.altKey) parts.push("alt");
+  if (e.shiftKey) parts.push("shift");
+  parts.push(e.key.toLowerCase());
+  return parts.join("+");
 }
 
 export function NovelEditor({
@@ -29,6 +39,7 @@ export function NovelEditor({
   lastSaved,
   isPublic,
   onTogglePublish,
+  macros = [],
 }: NovelEditorProps) {
   const saveRef = useRef(onSave);
   saveRef.current = onSave;
@@ -62,14 +73,37 @@ export function NovelEditor({
     };
   }, [editor]);
 
-  // Ctrl+S shortcut
+  // Keep macros ref up to date for keydown handler
+  const macrosRef = useRef(macros);
+  macrosRef.current = macros;
+
+  // Ctrl+S shortcut + macro shortcuts
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Ctrl+S → save
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault();
         if (editor) {
           saveRef.current(editor.getJSON(), editor.getText());
         }
+        return;
+      }
+
+      // Check macro shortcuts
+      if (!editor) return;
+      const normalized = normalizeKeyEvent(e);
+      const macro = macrosRef.current.find(
+        (m) => m.shortcut && m.shortcut === normalized
+      );
+      if (macro) {
+        e.preventDefault();
+        const lines = macro.content.split("\n");
+        const chain = editor.chain().focus();
+        lines.forEach((line, i) => {
+          if (i > 0) chain.setHardBreak();
+          if (line) chain.insertContent(line);
+        });
+        chain.run();
       }
     },
     [editor]
