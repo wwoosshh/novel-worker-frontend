@@ -47,6 +47,7 @@ export default function NovelDetailPage() {
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
 
+  // Load novel data (no dependency on user — avoids double fetch)
   useEffect(() => {
     async function load() {
       try {
@@ -62,16 +63,6 @@ export default function NovelDetailPage() {
             .sort((a, b) => a.number - b.number)
         );
         setNotices(noticesRes.data);
-
-        // Check subscription status
-        if (user) {
-          try {
-            const subsRes = await usersApi.subscriptions();
-            setSubscribed(subsRes.data.some((n) => n.id === novelId));
-          } catch {
-            // not subscribed or not logged in
-          }
-        }
       } catch (err) {
         console.error("Failed to load novel:", err);
       } finally {
@@ -79,6 +70,14 @@ export default function NovelDetailPage() {
       }
     }
     load();
+  }, [novelId]);
+
+  // Check subscription status separately when user changes
+  useEffect(() => {
+    if (!user) return;
+    usersApi.subscriptions()
+      .then((res) => setSubscribed(res.data.some((n) => n.id === novelId)))
+      .catch(() => {});
   }, [novelId, user]);
 
   const toggleSubscribe = async () => {

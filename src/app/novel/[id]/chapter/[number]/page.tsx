@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEditor, EditorContent } from "@tiptap/react";
@@ -17,6 +17,7 @@ export default function ChapterReaderPage() {
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchedRef = useRef<string | null>(null);
 
   const editor = useEditor({
     editable: false,
@@ -32,15 +33,18 @@ export default function ChapterReaderPage() {
   });
 
   useEffect(() => {
+    const key = `${novelId}-${chapterNumber}`;
+    if (fetchedRef.current === key) return;
+    fetchedRef.current = key;
+
     async function load() {
       try {
-        // Only fetch the chapter — novel metadata is included in the response
-        // This avoids incrementing the novel view_count
         const chapterRes = await chaptersApi.get(novelId, chapterNumber);
         setChapter(chapterRes.data);
       } catch (err) {
         console.error("Failed to load chapter:", err);
         setError("챕터를 불러올 수 없습니다.");
+        fetchedRef.current = null;
       } finally {
         setLoading(false);
       }
