@@ -6,6 +6,7 @@ import { EditorContent } from "@tiptap/react";
 import { EditorToolbar } from "./EditorToolbar";
 import { Eye, EyeOff } from "lucide-react";
 import type { Chapter, Macro } from "@/lib/api";
+import { executeMacro } from "@/lib/macroExecutor";
 
 interface NovelEditorProps {
   editor: Editor | null;
@@ -97,13 +98,19 @@ export function NovelEditor({
       );
       if (macro) {
         e.preventDefault();
-        const lines = macro.content.split("\n");
-        const chain = editor.chain().focus();
-        lines.forEach((line, i) => {
-          if (i > 0) chain.setHardBreak();
-          if (line) chain.insertContent(line);
-        });
-        chain.run();
+        if (macro.actions && macro.actions.length > 0) {
+          executeMacro(editor, macro.actions).catch((err) =>
+            console.error("매크로 실행 실패:", err)
+          );
+        } else {
+          const lines = macro.content.split("\n");
+          const chain = editor.chain().focus();
+          lines.forEach((line, i) => {
+            if (i > 0) chain.setHardBreak();
+            if (line) chain.insertContent(line);
+          });
+          chain.run();
+        }
       }
     },
     [editor]

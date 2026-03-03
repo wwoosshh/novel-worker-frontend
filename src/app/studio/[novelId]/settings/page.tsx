@@ -38,7 +38,10 @@ import {
   Package,
   X,
   Pin,
+  Blocks,
 } from "lucide-react";
+import { MacroBuilderDialog } from "@/components/macro/MacroBuilderDialog";
+import type { MacroAction } from "@/lib/macroTypes";
 
 type DbType = "characters" | "locations" | "factions" | "items";
 
@@ -682,13 +685,9 @@ function MacrosTab({ novelId }: { novelId: string }) {
   const [macros, setMacros] = useState<Macro[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Edit/Create dialog
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // Builder dialog
+  const [builderOpen, setBuilderOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Macro | null>(null);
-  const [formLabel, setFormLabel] = useState("");
-  const [formContent, setFormContent] = useState("");
-  const [formShortcut, setFormShortcut] = useState("");
-  const [formSaving, setFormSaving] = useState(false);
 
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<Macro | null>(null);
@@ -712,41 +711,32 @@ function MacrosTab({ novelId }: { novelId: string }) {
 
   const openCreate = () => {
     setEditTarget(null);
-    setFormLabel("");
-    setFormContent("");
-    setFormShortcut("");
-    setDialogOpen(true);
+    setBuilderOpen(true);
   };
 
   const openEdit = (macro: Macro) => {
     setEditTarget(macro);
-    setFormLabel(macro.label);
-    setFormContent(macro.content);
-    setFormShortcut(macro.shortcut ?? "");
-    setDialogOpen(true);
+    setBuilderOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!formLabel.trim() || !formContent.trim()) return;
-    setFormSaving(true);
-    try {
-      const payload = {
-        label: formLabel.trim(),
-        content: formContent,
-        shortcut: formShortcut || undefined,
-      };
-      if (editTarget) {
-        const res = await macrosApi.update(novelId, editTarget.id, payload);
-        setMacros((prev) => prev.map((m) => (m.id === editTarget.id ? res.data : m)));
-      } else {
-        const res = await macrosApi.create(novelId, payload);
-        setMacros((prev) => [...prev, res.data]);
-      }
-      setDialogOpen(false);
-    } catch (err) {
-      console.error("Failed to save macro:", err);
-    } finally {
-      setFormSaving(false);
+  const handleSave = async (data: {
+    label: string;
+    content: string;
+    shortcut?: string;
+    actions: MacroAction[];
+  }) => {
+    const payload = {
+      label: data.label,
+      content: data.content,
+      shortcut: data.shortcut,
+      actions: data.actions,
+    };
+    if (editTarget) {
+      const res = await macrosApi.update(novelId, editTarget.id, payload);
+      setMacros((prev) => prev.map((m) => (m.id === editTarget.id ? res.data : m)));
+    } else {
+      const res = await macrosApi.create(novelId, payload);
+      setMacros((prev) => [...prev, res.data]);
     }
   };
 
@@ -829,6 +819,19 @@ function MacrosTab({ novelId }: { novelId: string }) {
                       {macro.shortcut.split("+").map((k) => k.charAt(0).toUpperCase() + k.slice(1)).join("+")}
                     </span>
                   )}
+                  {macro.actions && macro.actions.length > 0 && (
+                    <span
+                      className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm"
+                      style={{
+                        color: "#8B5CF6",
+                        backgroundColor: "rgba(139,92,246,0.08)",
+                        border: "1px solid rgba(139,92,246,0.2)",
+                      }}
+                    >
+                      <Blocks className="h-2.5 w-2.5" />
+                      {macro.actions.length}개 동작
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] truncate" style={{ color: "#8A8478" }}>
                   {macro.content}
@@ -859,104 +862,13 @@ function MacrosTab({ novelId }: { novelId: string }) {
         </div>
       )}
 
-      {/* Create/Edit dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle style={{ fontFamily: "'Noto Serif KR', serif" }}>
-              {editTarget ? "매크로 수정" : "새 매크로"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
-                라벨
-              </label>
-              <input
-                value={formLabel}
-                onChange={(e) => setFormLabel(e.target.value)}
-                placeholder="매크로 이름"
-                className="w-full h-9 px-3 text-sm rounded-sm outline-none"
-                style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
-                단축키
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  value={formShortcut ? formShortcut.split("+").map((k) => k.charAt(0).toUpperCase() + k.slice(1)).join("+") : ""}
-                  readOnly
-                  placeholder="클릭 후 키 입력"
-                  className="flex-1 h-9 px-3 text-sm rounded-sm outline-none cursor-pointer font-mono"
-                  style={{ border: "1px solid #E8E2D9", color: "#1A1814", backgroundColor: "#FDFBF7" }}
-                  onKeyDown={(e) => {
-                    e.preventDefault();
-                    if (e.key === "Escape") return;
-                    if (["Control", "Alt", "Shift", "Meta"].includes(e.key)) return;
-                    const parts: string[] = [];
-                    if (e.ctrlKey || e.metaKey) parts.push("ctrl");
-                    if (e.altKey) parts.push("alt");
-                    if (e.shiftKey) parts.push("shift");
-                    parts.push(e.key.toLowerCase());
-                    setFormShortcut(parts.join("+"));
-                  }}
-                />
-                {formShortcut && (
-                  <button
-                    type="button"
-                    onClick={() => setFormShortcut("")}
-                    className="h-9 px-2 text-xs rounded-sm transition-colors"
-                    style={{ border: "1px solid #E8E2D9", color: "#8A8478" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#DC2626")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-              <p className="text-[10px] mt-1" style={{ color: "#8A8478" }}>
-                입력란을 클릭한 뒤 원하는 키 조합을 누르세요 (예: Ctrl+R)
-              </p>
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
-                내용
-              </label>
-              <textarea
-                value={formContent}
-                onChange={(e) => setFormContent(e.target.value)}
-                rows={5}
-                placeholder="매크로 내용을 입력하세요"
-                className="w-full px-3 py-2 text-sm rounded-sm outline-none resize-none"
-                style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => setDialogOpen(false)}
-              className="h-8 px-4 text-xs rounded-sm"
-              style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
-            >
-              취소
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={formSaving || !formLabel.trim() || !formContent.trim()}
-              className="h-8 px-4 text-xs font-medium rounded-sm transition-colors"
-              style={{
-                backgroundColor: "#D44B20",
-                color: "#FFFFFF",
-                opacity: formSaving || !formLabel.trim() || !formContent.trim() ? 0.6 : 1,
-              }}
-            >
-              {formSaving ? "저장 중..." : "저장"}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Macro Builder Dialog */}
+      <MacroBuilderDialog
+        open={builderOpen}
+        onOpenChange={setBuilderOpen}
+        editTarget={editTarget}
+        onSave={handleSave}
+      />
 
       {/* Delete dialog */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
