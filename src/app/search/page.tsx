@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -87,7 +87,7 @@ function CardSkeleton() {
 }
 
 /* ─── Page ─────────────────────────────────────────── */
-export default function SearchPage() {
+function SearchPageContent() {
   const searchParams = useSearchParams();
 
   const [inputValue, setInputValue] = useState(searchParams.get("q") ?? "");
@@ -343,5 +343,13 @@ export default function SearchPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <SearchPageContent />
+    </Suspense>
   );
 }
