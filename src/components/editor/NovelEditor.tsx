@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { Editor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
 import { EditorToolbar } from "./EditorToolbar";
+import { Eye, EyeOff } from "lucide-react";
 import type { Chapter } from "@/lib/api";
 
 interface NovelEditorProps {
@@ -14,6 +15,8 @@ interface NovelEditorProps {
   onSave: (content: Record<string, unknown>, contentText: string) => void;
   saving: boolean;
   lastSaved: Date | null;
+  isPublic: boolean;
+  onTogglePublish: () => void;
 }
 
 export function NovelEditor({
@@ -24,9 +27,13 @@ export function NovelEditor({
   onSave,
   saving,
   lastSaved,
+  isPublic,
+  onTogglePublish,
 }: NovelEditorProps) {
   const saveRef = useRef(onSave);
   saveRef.current = onSave;
+
+  const [charCount, setCharCount] = useState(0);
 
   // Load chapter content when chapter changes
   useEffect(() => {
@@ -38,6 +45,22 @@ export function NovelEditor({
       editor.commands.clearContent();
     }
   }, [editor, chapter?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track character count
+  useEffect(() => {
+    if (!editor) return;
+
+    const updateCount = () => {
+      const text = editor.getText().replace(/\s/g, "");
+      setCharCount(text.length);
+    };
+
+    updateCount();
+    editor.on("update", updateCount);
+    return () => {
+      editor.off("update", updateCount);
+    };
+  }, [editor]);
 
   // Ctrl+S shortcut
   const handleKeyDown = useCallback(
@@ -111,14 +134,36 @@ export function NovelEditor({
         className="flex items-center justify-between px-4 sm:px-8 py-2.5 border-t"
         style={{ borderColor: "#E8E2D9", backgroundColor: "#FDFBF7" }}
       >
-        <span className="text-[10px]" style={{ color: "#C5BDB2" }}>
-          {lastSaved
-            ? `마지막 저장: ${lastSaved.toLocaleTimeString("ko-KR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}`
-            : "저장되지 않음"}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px]" style={{ color: "#8A8478" }}>
+            {charCount.toLocaleString()}자
+          </span>
+          <span className="text-[10px]" style={{ color: "#E8E2D9" }}>|</span>
+          <span className="text-[10px]" style={{ color: "#C5BDB2" }}>
+            {lastSaved
+              ? `마지막 저장: ${lastSaved.toLocaleTimeString("ko-KR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}`
+              : "저장되지 않음"}
+          </span>
+          <span className="text-[10px]" style={{ color: "#E8E2D9" }}>|</span>
+          <button
+            onClick={onTogglePublish}
+            disabled={saving}
+            className="flex items-center gap-1 text-[10px] font-medium transition-colors"
+            style={{ color: isPublic ? "#2D7A3A" : "#8A8478" }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            {isPublic ? (
+              <Eye className="h-3 w-3" />
+            ) : (
+              <EyeOff className="h-3 w-3" />
+            )}
+            {isPublic ? "공개" : "비공개"}
+          </button>
+        </div>
 
         <div className="flex items-center gap-2">
           <button

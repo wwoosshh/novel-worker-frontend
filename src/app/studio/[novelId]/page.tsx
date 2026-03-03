@@ -12,6 +12,14 @@ import { ChapterSidebar } from "@/components/editor/ChapterSidebar";
 import { DbQuickPanel } from "@/components/editor/DbQuickPanel";
 import { NovelEditor } from "@/components/editor/NovelEditor";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Sheet,
   SheetContent,
   SheetTitle,
@@ -32,6 +40,10 @@ export default function EditorWorkspacePage() {
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Delete dialog
+  const [deleteTarget, setDeleteTarget] = useState<Chapter | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Mobile sheet states
   const [leftOpen, setLeftOpen] = useState(false);
@@ -141,6 +153,49 @@ export default function EditorWorkspacePage() {
     [novelId, activeChapter, chapterTitle]
   );
 
+  // Toggle publish
+  const togglePublish = useCallback(async () => {
+    if (!activeChapter || !editor) return;
+    setSaving(true);
+    try {
+      const res = await chaptersApi.save(novelId, activeChapter.id, {
+        title: chapterTitle,
+        content: editor.getJSON(),
+        content_text: editor.getText(),
+        is_public: !activeChapter.is_public,
+      });
+      setActiveChapter(res.data);
+      setChapters((prev) =>
+        prev.map((ch) => (ch.id === res.data.id ? res.data : ch))
+      );
+      setLastSaved(new Date());
+    } catch (err) {
+      console.error("Failed to toggle publish:", err);
+    } finally {
+      setSaving(false);
+    }
+  }, [novelId, activeChapter, chapterTitle, editor]);
+
+  // Delete chapter
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await chaptersApi.delete(novelId, deleteTarget.id);
+      setChapters((prev) => prev.filter((ch) => ch.id !== deleteTarget.id));
+      if (activeChapter?.id === deleteTarget.id) {
+        setActiveChapter(null);
+        setChapterTitle("");
+        editor?.commands.clearContent();
+      }
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error("Failed to delete chapter:", err);
+    } finally {
+      setDeleting(false);
+    }
+  }, [novelId, deleteTarget, activeChapter, editor]);
+
   // Loading state
   if (loading || authLoading) {
     return (
@@ -197,11 +252,13 @@ export default function EditorWorkspacePage() {
           style={{ borderColor: "#E8E2D9" }}
         >
           <ChapterSidebar
+            novelId={novelId}
             novelTitle={novel?.title ?? ""}
             chapters={chapters}
             activeChapterId={activeChapter?.id ?? null}
             onSelect={selectChapter}
             onCreate={createChapter}
+            onDelete={(ch) => setDeleteTarget(ch)}
             onBack={() => router.push("/studio")}
             creating={creating}
           />
@@ -217,6 +274,8 @@ export default function EditorWorkspacePage() {
             onSave={saveChapter}
             saving={saving}
             lastSaved={lastSaved}
+            isPublic={activeChapter?.is_public ?? false}
+            onTogglePublish={togglePublish}
           />
         </div>
 
@@ -234,11 +293,13 @@ export default function EditorWorkspacePage() {
         <SheetContent side="left" className="w-64 p-0">
           <SheetTitle className="sr-only">챕터 목록</SheetTitle>
           <ChapterSidebar
+            novelId={novelId}
             novelTitle={novel?.title ?? ""}
             chapters={chapters}
             activeChapterId={activeChapter?.id ?? null}
             onSelect={selectChapter}
             onCreate={createChapter}
+            onDelete={(ch) => setDeleteTarget(ch)}
             onBack={() => router.push("/studio")}
             creating={creating}
           />
@@ -251,6 +312,46 @@ export default function EditorWorkspacePage() {
           <DbQuickPanel novelId={novelId} editor={editor} />
         </SheetContent>
       </Sheet>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Noto Serif KR', serif" }}>
+              챕터 삭제
+            </DialogTitle>
+            <DialogDescription>
+              {deleteTarget?.number}화 &quot;{deleteTarget?.title || "제목 없음"}&quot;을(를) 삭제하시겠습니까?
+              <br />이 작업은 되돌릴 수 없습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="h-8 px-4 text-xs rounded-sm transition-colors"
+              style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#D4C9B8")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
+            >
+              취소
+            </button>
+            <button
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="h-8 px-4 text-xs font-medium rounded-sm transition-colors"
+              style={{
+                backgroundColor: "#DC2626",
+                color: "#FFFFFF",
+                opacity: deleting ? 0.6 : 1,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#B91C1C")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#DC2626")}
+            >
+              {deleting ? "삭제 중..." : "삭제"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
