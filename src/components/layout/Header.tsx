@@ -4,28 +4,28 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import { Search, PenLine, User, Menu, X } from "lucide-react";
 
 const GENRE_NAV = [
   { label: "판타지", href: "/search?genre=판타지" },
   { label: "로맨스", href: "/search?genre=로맨스" },
-  { label: "현대", href: "/search?genre=현대" },
-  { label: "무협", href: "/search?genre=무협" },
-  { label: "SF", href: "/search?genre=SF" },
-  { label: "공포", href: "/search?genre=공포" },
-  { label: "완결", href: "/search?status=completed" },
+  { label: "현대",   href: "/search?genre=현대" },
+  { label: "무협",   href: "/search?genre=무협" },
+  { label: "SF",     href: "/search?genre=SF" },
+  { label: "공포",   href: "/search?genre=공포" },
+  { label: "완결",   href: "/search?status=completed" },
 ];
 
-interface HeaderProps {
-  user?: { id: string; display_name: string } | null;
-}
-
-export function Header({ user }: HeaderProps) {
+export function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+
+  const isLoggedIn = !loading && !!user;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,25 +101,17 @@ export function Header({ user }: HeaderProps) {
 
             {/* Right actions */}
             <div className="ml-auto flex items-center gap-1">
-              {user ? (
+              {loading ? (
+                <div className="h-8 w-20 rounded-md animate-pulse" style={{ backgroundColor: "#141210" }} />
+              ) : isLoggedIn ? (
                 <>
                   <Link
                     href="/studio"
-                    className={cn(
-                      "hidden sm:flex items-center gap-1.5 h-8 px-3 text-sm rounded-md transition-all",
-                      "border font-medium"
-                    )}
+                    className={cn("hidden sm:flex items-center gap-1.5 h-8 px-3 text-sm rounded-md transition-all border font-medium")}
                     style={{
-                      backgroundColor:
-                        pathname.startsWith("/studio")
-                          ? "rgba(191,151,66,0.12)"
-                          : "transparent",
-                      borderColor:
-                        pathname.startsWith("/studio")
-                          ? "rgba(191,151,66,0.35)"
-                          : "#302B22",
-                      color:
-                        pathname.startsWith("/studio") ? "#BF9742" : "#9E9688",
+                      backgroundColor: pathname.startsWith("/studio") ? "rgba(191,151,66,0.12)" : "transparent",
+                      borderColor:     pathname.startsWith("/studio") ? "rgba(191,151,66,0.35)" : "#302B22",
+                      color:           pathname.startsWith("/studio") ? "#BF9742" : "#9E9688",
                     }}
                   >
                     <PenLine className="h-3.5 w-3.5" />
@@ -129,11 +121,9 @@ export function Header({ user }: HeaderProps) {
                     href="/mypage"
                     className="flex items-center justify-center h-8 w-8 rounded-md transition-colors"
                     style={{
-                      backgroundColor: pathname.startsWith("/mypage")
-                        ? "rgba(191,151,66,0.12)"
-                        : "transparent",
+                      backgroundColor: pathname.startsWith("/mypage") ? "rgba(191,151,66,0.12)" : "transparent",
                       border: "1px solid #302B22",
-                      color: pathname.startsWith("/mypage") ? "#BF9742" : "#9E9688",
+                      color:  pathname.startsWith("/mypage") ? "#BF9742" : "#9E9688",
                     }}
                     aria-label="마이페이지"
                   >
@@ -146,28 +136,17 @@ export function Header({ user }: HeaderProps) {
                     href="/login"
                     className="hidden sm:flex h-8 px-3 text-sm items-center rounded-md transition-colors"
                     style={{ color: "#9E9688" }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "#EDE8DC")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "#9E9688")
-                    }
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#EDE8DC")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#9E9688")}
                   >
                     로그인
                   </Link>
                   <Link
                     href="/signup"
                     className="hidden sm:flex h-8 px-3 text-sm items-center rounded-md font-medium transition-all"
-                    style={{
-                      backgroundColor: "#BF9742",
-                      color: "#0C0A08",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#D4AF5F")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#BF9742")
-                    }
+                    style={{ backgroundColor: "#BF9742", color: "#0C0A08" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#D4AF5F")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#BF9742")}
                   >
                     회원가입
                   </Link>
@@ -247,7 +226,7 @@ export function Header({ user }: HeaderProps) {
                 />
               </div>
             </form>
-            {!user ? (
+            {!isLoggedIn ? (
               <div className="flex gap-2 pt-1">
                 <Link
                   href="/login"
