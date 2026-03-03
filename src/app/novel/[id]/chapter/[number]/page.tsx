@@ -6,12 +6,7 @@ import Link from "next/link";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import {
-  novelsApi,
-  chaptersApi,
-  type Novel,
-  type Chapter,
-} from "@/lib/api";
+import { chaptersApi, type Chapter } from "@/lib/api";
 import { ArrowLeft, ChevronLeft, ChevronRight, List, Loader2 } from "lucide-react";
 
 export default function ChapterReaderPage() {
@@ -19,7 +14,6 @@ export default function ChapterReaderPage() {
   const novelId = params.id as string;
   const chapterNumber = parseInt(params.number as string, 10);
 
-  const [novel, setNovel] = useState<Novel | null>(null);
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +34,9 @@ export default function ChapterReaderPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [novelRes, chapterRes] = await Promise.all([
-          novelsApi.get(novelId),
-          chaptersApi.get(novelId, chapterNumber),
-        ]);
-        setNovel(novelRes.data);
+        // Only fetch the chapter — novel metadata is included in the response
+        // This avoids incrementing the novel view_count
+        const chapterRes = await chaptersApi.get(novelId, chapterNumber);
         setChapter(chapterRes.data);
       } catch (err) {
         console.error("Failed to load chapter:", err);
@@ -79,7 +71,7 @@ export default function ChapterReaderPage() {
     );
   }
 
-  if (error || !chapter || !novel) {
+  if (error || !chapter) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-4"
@@ -99,8 +91,10 @@ export default function ChapterReaderPage() {
     );
   }
 
+  const novelTitle = chapter.novel_title ?? "소설";
+  const totalChapters = chapter.novel_chapter_count ?? 0;
   const hasPrev = chapterNumber > 1;
-  const hasNext = novel.chapter_count > chapterNumber;
+  const hasNext = totalChapters > chapterNumber;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#FDFBF7" }}>
@@ -126,7 +120,7 @@ export default function ChapterReaderPage() {
               className="truncate max-w-[140px] sm:max-w-[240px]"
               style={{ fontFamily: "'Noto Serif KR', serif" }}
             >
-              {novel.title}
+              {novelTitle}
             </span>
           </Link>
 

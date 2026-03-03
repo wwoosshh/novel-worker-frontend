@@ -10,8 +10,10 @@ import {
   novelsApi,
   chaptersApi,
   usersApi,
+  noticesApi,
   type Novel,
   type Chapter,
+  type Notice,
 } from "@/lib/api";
 import {
   BookOpen,
@@ -22,6 +24,8 @@ import {
   Bell,
   BellOff,
   Loader2,
+  Megaphone,
+  Pin,
 } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -38,6 +42,7 @@ export default function NovelDetailPage() {
 
   const [novel, setNovel] = useState<Novel | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [subscribed, setSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
@@ -45,9 +50,10 @@ export default function NovelDetailPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [novelRes, chaptersRes] = await Promise.all([
+        const [novelRes, chaptersRes, noticesRes] = await Promise.all([
           novelsApi.get(novelId),
           chaptersApi.list(novelId),
+          noticesApi.list(novelId),
         ]);
         setNovel(novelRes.data);
         setChapters(
@@ -55,6 +61,7 @@ export default function NovelDetailPage() {
             .filter((ch) => ch.is_public)
             .sort((a, b) => a.number - b.number)
         );
+        setNotices(noticesRes.data);
 
         // Check subscription status
         if (user) {
@@ -263,6 +270,63 @@ export default function NovelDetailPage() {
             </div>
           ))}
         </div>
+
+        {/* Notices section */}
+        {notices.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-3">
+              <p
+                className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+                style={{ color: "#8A8478" }}
+              >
+                공지사항
+              </p>
+              <div className="flex-1 h-px" style={{ backgroundColor: "#EDE8E0" }} />
+            </div>
+            <div className="space-y-1">
+              {notices.map((notice) => (
+                <Link
+                  key={notice.id}
+                  href={`/novel/${novelId}/notice/${notice.id}`}
+                  className="flex items-center gap-3 px-4 py-3 rounded-sm transition-all group"
+                  style={{ border: "1px solid #E8E2D9", backgroundColor: "#FDFBF7" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "#D4C9B8";
+                    e.currentTarget.style.backgroundColor = "#F5F1EB";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#E8E2D9";
+                    e.currentTarget.style.backgroundColor = "#FDFBF7";
+                  }}
+                >
+                  <span className="shrink-0" style={{ color: "#D44B20" }}>
+                    {notice.is_pinned ? (
+                      <Pin className="h-3.5 w-3.5" />
+                    ) : (
+                      <Megaphone className="h-3.5 w-3.5" />
+                    )}
+                  </span>
+                  <span
+                    className="text-sm flex-1 truncate"
+                    style={{ color: "#1A1814", fontFamily: "'Noto Serif KR', serif" }}
+                  >
+                    {notice.title}
+                  </span>
+                  <span className="text-[10px] shrink-0" style={{ color: "#C5BDB2" }}>
+                    {new Date(notice.created_at).toLocaleDateString("ko-KR", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <ChevronRight
+                    className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
+                    style={{ color: "#C5BDB2" }}
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Chapter list */}
         <div className="mb-8">

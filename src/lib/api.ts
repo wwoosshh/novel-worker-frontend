@@ -71,6 +71,8 @@ export interface Chapter {
   view_count: number;
   created_at: string;
   updated_at: string;
+  novel_title?: string;
+  novel_chapter_count?: number;
 }
 
 export interface Macro {
@@ -218,6 +220,47 @@ export const macrosApi = {
 
   delete(novelId: string, id: string) {
     return apiFetch<{ message: string }>(`/api/novels/${novelId}/macros/${id}`, { method: "DELETE" });
+  },
+};
+
+/* ─── Notices API ────────────────────────────────────── */
+
+export interface Notice {
+  id: string;
+  novel_id: string;
+  title: string;
+  content: string;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+  novel_title?: string;
+}
+
+export const noticesApi = {
+  list(novelId: string) {
+    return apiFetch<{ data: Notice[] }>(`/api/novels/${novelId}/notices`);
+  },
+
+  get(novelId: string, id: string) {
+    return apiFetch<{ data: Notice }>(`/api/novels/${novelId}/notices/${id}`);
+  },
+
+  create(novelId: string, data: { title: string; content: string; is_pinned?: boolean }) {
+    return apiFetch<{ data: Notice }>(`/api/novels/${novelId}/notices`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  update(novelId: string, id: string, data: { title: string; content: string; is_pinned?: boolean }) {
+    return apiFetch<{ data: Notice }>(`/api/novels/${novelId}/notices/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  delete(novelId: string, id: string) {
+    return apiFetch<{ message: string }>(`/api/novels/${novelId}/notices/${id}`, { method: "DELETE" });
   },
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -10,9 +10,11 @@ import {
   novelsApi,
   settingsApi,
   macrosApi,
+  noticesApi,
   type Novel,
   type DbEntry,
   type Macro,
+  type Notice,
 } from "@/lib/api";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -35,6 +37,7 @@ import {
   Shield,
   Package,
   X,
+  Pin,
 } from "lucide-react";
 
 type DbType = "characters" | "locations" | "factions" | "items";
@@ -931,11 +934,298 @@ function MacrosTab({ novelId }: { novelId: string }) {
   );
 }
 
+/* ─── Notices Tab ────────────────────────────────────── */
+function NoticesTab({ novelId }: { novelId: string }) {
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Edit/Create dialog
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Notice | null>(null);
+  const [formTitle, setFormTitle] = useState("");
+  const [formContent, setFormContent] = useState("");
+  const [formPinned, setFormPinned] = useState(false);
+  const [formSaving, setFormSaving] = useState(false);
+
+  // Delete dialog
+  const [deleteTarget, setDeleteTarget] = useState<Notice | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchNotices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await noticesApi.list(novelId);
+      setNotices(res.data);
+    } catch (err) {
+      console.error("Failed to load notices:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [novelId]);
+
+  useEffect(() => {
+    fetchNotices();
+  }, [fetchNotices]);
+
+  const openCreate = () => {
+    setEditTarget(null);
+    setFormTitle("");
+    setFormContent("");
+    setFormPinned(false);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (notice: Notice) => {
+    setEditTarget(notice);
+    setFormTitle(notice.title);
+    setFormContent(notice.content);
+    setFormPinned(notice.is_pinned);
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formTitle.trim() || !formContent.trim()) return;
+    setFormSaving(true);
+    try {
+      if (editTarget) {
+        const res = await noticesApi.update(novelId, editTarget.id, {
+          title: formTitle.trim(),
+          content: formContent,
+          is_pinned: formPinned,
+        });
+        setNotices((prev) => prev.map((n) => (n.id === editTarget.id ? res.data : n)));
+      } else {
+        const res = await noticesApi.create(novelId, {
+          title: formTitle.trim(),
+          content: formContent,
+          is_pinned: formPinned,
+        });
+        setNotices((prev) => [res.data, ...prev]);
+      }
+      setDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to save notice:", err);
+    } finally {
+      setFormSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await noticesApi.delete(novelId, deleteTarget.id);
+      setNotices((prev) => prev.filter((n) => n.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error("Failed to delete notice:", err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div>
+      {/* Add button */}
+      <button
+        onClick={openCreate}
+        className="flex items-center gap-1.5 h-8 px-3 text-xs font-medium rounded-sm transition-all mb-4"
+        style={{
+          backgroundColor: "rgba(212,75,32,0.06)",
+          border: "1px solid rgba(212,75,32,0.15)",
+          color: "#D44B20",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.12)")}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.06)")}
+      >
+        <Plus className="h-3.5 w-3.5" />
+        새 공지사항
+      </button>
+
+      {/* Notices list */}
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-16 rounded-sm animate-pulse"
+              style={{ backgroundColor: "#F5F1EB" }}
+            />
+          ))}
+        </div>
+      ) : notices.length === 0 ? (
+        <div
+          className="flex flex-col items-center justify-center py-12 rounded-sm"
+          style={{ border: "2px dashed #E8E2D9" }}
+        >
+          <p className="text-xs" style={{ color: "#8A8478" }}>
+            등록된 공지사항이 없습니다
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {notices.map((notice) => (
+            <div
+              key={notice.id}
+              className="flex items-start justify-between px-4 py-3 rounded-sm transition-all"
+              style={{ border: "1px solid #E8E2D9", backgroundColor: "#FDFBF7" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#D4C9B8")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  {notice.is_pinned && (
+                    <Pin className="h-3 w-3 shrink-0" style={{ color: "#D44B20" }} />
+                  )}
+                  <p className="text-sm font-medium truncate" style={{ color: "#1A1814" }}>
+                    {notice.title}
+                  </p>
+                </div>
+                <p className="text-[11px] truncate" style={{ color: "#8A8478" }}>
+                  {notice.content}
+                </p>
+                <p className="text-[10px] mt-1" style={{ color: "#C5BDB2" }}>
+                  {new Date(notice.created_at).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0 ml-2">
+                <button
+                  onClick={() => openEdit(notice)}
+                  className="h-6 w-6 flex items-center justify-center rounded-sm transition-colors"
+                  style={{ color: "#8A8478" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#D44B20")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(notice)}
+                  className="h-6 w-6 flex items-center justify-center rounded-sm transition-colors"
+                  style={{ color: "#8A8478" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#DC2626")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Create/Edit dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Noto Serif KR', serif" }}>
+              {editTarget ? "공지사항 수정" : "새 공지사항"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
+                제목
+              </label>
+              <input
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+                placeholder="공지사항 제목"
+                className="w-full h-9 px-3 text-sm rounded-sm outline-none"
+                style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
+                내용
+              </label>
+              <textarea
+                value={formContent}
+                onChange={(e) => setFormContent(e.target.value)}
+                rows={6}
+                placeholder="공지 내용을 입력하세요"
+                className="w-full px-3 py-2 text-sm rounded-sm outline-none resize-none"
+                style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
+              />
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formPinned}
+                onChange={(e) => setFormPinned(e.target.checked)}
+                className="rounded"
+              />
+              <span className="text-xs" style={{ color: "#6B6560" }}>
+                상단 고정
+              </span>
+            </label>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setDialogOpen(false)}
+              className="h-8 px-4 text-xs rounded-sm"
+              style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
+            >
+              취소
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={formSaving || !formTitle.trim() || !formContent.trim()}
+              className="h-8 px-4 text-xs font-medium rounded-sm transition-colors"
+              style={{
+                backgroundColor: "#D44B20",
+                color: "#FFFFFF",
+                opacity: formSaving || !formTitle.trim() || !formContent.trim() ? 0.6 : 1,
+              }}
+            >
+              {formSaving ? "저장 중..." : "저장"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>공지사항 삭제</DialogTitle>
+            <DialogDescription>
+              &quot;{deleteTarget?.title}&quot; 공지를 삭제하시겠습니까?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="h-8 px-4 text-xs rounded-sm"
+              style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
+            >
+              취소
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="h-8 px-4 text-xs font-medium rounded-sm transition-colors"
+              style={{ backgroundColor: "#DC2626", color: "#FFFFFF", opacity: deleting ? 0.6 : 1 }}
+            >
+              {deleting ? "삭제 중..." : "삭제"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 /* ─── Settings Page ──────────────────────────────────── */
 export default function SettingsPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const novelId = params.novelId as string;
+  const defaultTab = searchParams.get("tab") ?? "basic";
   const { user, loading: authLoading } = useAuth();
 
   const [novel, setNovel] = useState<Novel | null>(null);
@@ -1009,11 +1299,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="basic">
+        <Tabs defaultValue={defaultTab}>
           <TabsList variant="line" className="mb-6">
             <TabsTrigger value="basic">기본 정보</TabsTrigger>
             <TabsTrigger value="db">설정 DB</TabsTrigger>
             <TabsTrigger value="macros">매크로</TabsTrigger>
+            <TabsTrigger value="notices">공지사항</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic">
@@ -1031,6 +1322,10 @@ export default function SettingsPage() {
 
           <TabsContent value="macros">
             <MacrosTab novelId={novelId} />
+          </TabsContent>
+
+          <TabsContent value="notices">
+            <NoticesTab novelId={novelId} />
           </TabsContent>
         </Tabs>
       </main>
