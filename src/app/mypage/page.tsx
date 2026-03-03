@@ -385,11 +385,13 @@ export default function MyPage() {
     );
   }
 
+  if (!user) return null;
+
   const tabContent: Record<Tab, React.ReactNode> = {
-    profile:       <ProfileTab profile={profile} novels={novels} userEmail={user!.email ?? ""} onUpdated={setProfile} />,
+    profile:       <ProfileTab profile={profile} novels={novels} userEmail={user.email ?? ""} onUpdated={setProfile} />,
     subscriptions: <SubscriptionsTab subs={subs} />,
     notifications: <NotificationsTab />,
-    account:       <AccountTab userEmail={user!.email ?? ""} />,
+    account:       <AccountTab userEmail={user.email ?? ""} />,
   };
 
   return (
