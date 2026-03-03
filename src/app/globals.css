@@ -201,3 +201,53 @@
   .cover-gradient-4 { background: linear-gradient(150deg, #DDD6E5 0%, #C4B8D4 100%); }
   .cover-gradient-5 { background: linear-gradient(150deg, #E5E0D0 0%, #D4CDB8 100%); }
 }
+
+/* ─── ProseMirror Editor ─────────────────────────── */
+.ProseMirror {
+  outline: none;
+  min-height: 100%;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #C5BDB2;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid #E8E2D9;
+  margin: 1.5em 0;
+}
+
+.ProseMirror hr.ProseMirror-selectednode {
+  border-top-color: #D44B20;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #E8E2D9;
+  padding-left: 1em;
+  color: #6B6560;
+  margin: 1em 0;
+}
+
+.ProseMirror code {
+  background-color: #F5F1EB;
+  border-radius: 3px;
+  padding: 0.15em 0.4em;
+  font-size: 0.9em;
+}
+
+.ProseMirror strong {
+  font-weight: 700;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
