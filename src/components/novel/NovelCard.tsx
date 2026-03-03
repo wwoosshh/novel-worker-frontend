@@ -17,9 +17,9 @@ export interface NovelCardData {
 }
 
 const STATUS_CONFIG = {
-  ongoing:   { label: "연재중",  color: "#58A064", bg: "rgba(88,160,100,0.12)" },
-  completed: { label: "완결",    color: "#6B9FD4", bg: "rgba(107,159,212,0.12)" },
-  hiatus:    { label: "휴재",    color: "#C0954A", bg: "rgba(192,149,74,0.12)" },
+  ongoing:   { label: "연재중",  color: "#2D7A3A", bg: "rgba(45,122,58,0.08)" },
+  completed: { label: "완결",    color: "#3A6FA0", bg: "rgba(58,111,160,0.08)" },
+  hiatus:    { label: "휴재",    color: "#A07830", bg: "rgba(160,120,48,0.08)" },
 };
 
 const PLACEHOLDER_GRADIENTS = [
@@ -54,7 +54,7 @@ export function NovelCard({ novel, className, priority }: NovelCardProps) {
       {/* Cover */}
       <div
         className="relative aspect-[3/4] rounded-sm overflow-hidden mb-2"
-        style={{ border: "1px solid #302B22" }}
+        style={{ border: "1px solid #E8E2D9" }}
       >
         {novel.cover_url ? (
           <Image
@@ -73,7 +73,7 @@ export function NovelCard({ novel, className, priority }: NovelCardProps) {
               className="text-[11px] leading-tight font-medium line-clamp-3 w-full"
               style={{
                 fontFamily: "'Noto Serif KR', serif",
-                color: "rgba(237,232,220,0.6)",
+                color: "rgba(26,24,20,0.5)",
               }}
             >
               {novel.title}
@@ -100,7 +100,7 @@ export function NovelCard({ novel, className, priority }: NovelCardProps) {
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
             background:
-              "linear-gradient(to top, rgba(191,151,66,0.15) 0%, transparent 60%)",
+              "linear-gradient(to top, rgba(212,75,32,0.08) 0%, transparent 60%)",
           }}
         />
       </div>
@@ -108,21 +108,21 @@ export function NovelCard({ novel, className, priority }: NovelCardProps) {
       {/* Info */}
       <div className="space-y-0.5">
         <h3
-          className="text-xs font-medium line-clamp-2 leading-snug transition-colors"
+          className="text-xs font-medium line-clamp-2 leading-snug transition-colors group-hover:text-[#D44B20]"
           style={{
             fontFamily: "'Noto Serif KR', serif",
-            color: "#EDE8DC",
+            color: "#1A1814",
           }}
         >
           {novel.title}
         </h3>
         <p
           className="text-[10px]"
-          style={{ color: "#5A544A" }}
+          style={{ color: "#8A8478" }}
         >
           {novel.author_name}
           {novel.latest_chapter && (
-            <span className="ml-1" style={{ color: "#5A544A" }}>
+            <span className="ml-1" style={{ color: "#8A8478" }}>
               · {novel.latest_chapter}화
             </span>
           )}

@@ -40,8 +40,8 @@ export function Header() {
       <div
         className="border-b"
         style={{
-          backgroundColor: "rgba(12, 10, 8, 0.92)",
-          borderColor: "#302B22",
+          backgroundColor: "rgba(253, 251, 247, 0.92)",
+          borderColor: "#E8E2D9",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
         }}
@@ -53,8 +53,9 @@ export function Header() {
               <span
                 className="text-lg font-bold tracking-tight"
                 style={{
-                  fontFamily: "'Libre Baskerville', Georgia, serif",
-                  color: "#EDE8DC",
+                  fontFamily: "'Cormorant', Georgia, serif",
+                  color: "#1A1814",
+                  fontSize: "1.35rem",
                 }}
               >
                 Novel
@@ -62,8 +63,9 @@ export function Header() {
               <span
                 className="text-lg font-bold tracking-tight"
                 style={{
-                  fontFamily: "'Libre Baskerville', Georgia, serif",
-                  color: "#BF9742",
+                  fontFamily: "'Cormorant', Georgia, serif",
+                  color: "#D44B20",
+                  fontSize: "1.35rem",
                 }}
               >
                 Worker
@@ -79,7 +81,7 @@ export function Header() {
                 <Search
                   className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 pointer-events-none transition-colors"
                   style={{
-                    color: searchFocused ? "#BF9742" : "#5A544A",
+                    color: searchFocused ? "#D44B20" : "#8A8478",
                   }}
                 />
                 <input
@@ -90,10 +92,10 @@ export function Header() {
                   placeholder="제목, 작가 검색..."
                   className="w-full h-8 pl-9 pr-3 text-sm rounded-md transition-all outline-none"
                   style={{
-                    backgroundColor: searchFocused ? "#1C1914" : "#141210",
-                    border: `1px solid ${searchFocused ? "rgba(191,151,66,0.4)" : "#302B22"}`,
-                    color: "#EDE8DC",
-                    fontFamily: "'DM Sans', sans-serif",
+                    backgroundColor: searchFocused ? "#FFFFFF" : "#F5F1EB",
+                    border: `1px solid ${searchFocused ? "rgba(212,75,32,0.35)" : "#E8E2D9"}`,
+                    color: "#1A1814",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                   }}
                 />
               </div>
@@ -102,16 +104,16 @@ export function Header() {
             {/* Right actions */}
             <div className="ml-auto flex items-center gap-1">
               {loading ? (
-                <div className="h-8 w-20 rounded-md animate-pulse" style={{ backgroundColor: "#141210" }} />
+                <div className="h-8 w-20 rounded-md animate-pulse" style={{ backgroundColor: "#F5F1EB" }} />
               ) : isLoggedIn ? (
                 <>
                   <Link
                     href="/studio"
                     className={cn("hidden sm:flex items-center gap-1.5 h-8 px-3 text-sm rounded-md transition-all border font-medium")}
                     style={{
-                      backgroundColor: pathname.startsWith("/studio") ? "rgba(191,151,66,0.12)" : "transparent",
-                      borderColor:     pathname.startsWith("/studio") ? "rgba(191,151,66,0.35)" : "#302B22",
-                      color:           pathname.startsWith("/studio") ? "#BF9742" : "#9E9688",
+                      backgroundColor: pathname.startsWith("/studio") ? "rgba(212,75,32,0.08)" : "transparent",
+                      borderColor:     pathname.startsWith("/studio") ? "rgba(212,75,32,0.25)" : "#E8E2D9",
+                      color:           pathname.startsWith("/studio") ? "#D44B20" : "#6B6560",
                     }}
                   >
                     <PenLine className="h-3.5 w-3.5" />
@@ -121,9 +123,9 @@ export function Header() {
                     href="/mypage"
                     className="flex items-center justify-center h-8 w-8 rounded-md transition-colors"
                     style={{
-                      backgroundColor: pathname.startsWith("/mypage") ? "rgba(191,151,66,0.12)" : "transparent",
-                      border: "1px solid #302B22",
-                      color:  pathname.startsWith("/mypage") ? "#BF9742" : "#9E9688",
+                      backgroundColor: pathname.startsWith("/mypage") ? "rgba(212,75,32,0.08)" : "transparent",
+                      border: "1px solid #E8E2D9",
+                      color:  pathname.startsWith("/mypage") ? "#D44B20" : "#6B6560",
                     }}
                     aria-label="마이페이지"
                   >
@@ -135,18 +137,18 @@ export function Header() {
                   <Link
                     href="/login"
                     className="hidden sm:flex h-8 px-3 text-sm items-center rounded-md transition-colors"
-                    style={{ color: "#9E9688" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#EDE8DC")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#9E9688")}
+                    style={{ color: "#6B6560" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#1A1814")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#6B6560")}
                   >
                     로그인
                   </Link>
                   <Link
                     href="/signup"
                     className="hidden sm:flex h-8 px-3 text-sm items-center rounded-md font-medium transition-all"
-                    style={{ backgroundColor: "#BF9742", color: "#0C0A08" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#D4AF5F")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#BF9742")}
+                    style={{ backgroundColor: "#D44B20", color: "#FFFFFF" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#B8401A")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#D44B20")}
                   >
                     회원가입
                   </Link>
@@ -156,7 +158,7 @@ export function Header() {
               {/* Mobile menu toggle */}
               <button
                 className="sm:hidden flex items-center justify-center h-8 w-8 rounded-md"
-                style={{ color: "#9E9688" }}
+                style={{ color: "#6B6560" }}
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="메뉴"
               >
@@ -179,17 +181,17 @@ export function Header() {
                   href={item.href}
                   className="shrink-0 px-3 h-7 flex items-center text-xs rounded transition-all whitespace-nowrap"
                   style={{
-                    color: isActive ? "#BF9742" : "#9E9688",
+                    color: isActive ? "#D44B20" : "#6B6560",
                     backgroundColor: isActive
-                      ? "rgba(191,151,66,0.1)"
+                      ? "rgba(212,75,32,0.06)"
                       : "transparent",
                     fontWeight: isActive ? 500 : 400,
                   }}
                   onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.color = "#EDE8DC";
+                    if (!isActive) e.currentTarget.style.color = "#1A1814";
                   }}
                   onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.color = "#9E9688";
+                    if (!isActive) e.currentTarget.style.color = "#6B6560";
                   }}
                 >
                   {item.label}
@@ -205,23 +207,23 @@ export function Header() {
         <div
           className="sm:hidden border-b"
           style={{
-            backgroundColor: "#141210",
-            borderColor: "#302B22",
+            backgroundColor: "#FFFFFF",
+            borderColor: "#E8E2D9",
           }}
         >
           <div className="px-4 py-3 space-y-2">
             <form onSubmit={handleSearch}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#5A544A" }} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "#8A8478" }} />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="검색..."
                   className="w-full h-9 pl-9 pr-3 text-sm rounded-md outline-none"
                   style={{
-                    backgroundColor: "#1C1914",
-                    border: "1px solid #302B22",
-                    color: "#EDE8DC",
+                    backgroundColor: "#F5F1EB",
+                    border: "1px solid #E8E2D9",
+                    color: "#1A1814",
                   }}
                 />
               </div>
@@ -231,7 +233,7 @@ export function Header() {
                 <Link
                   href="/login"
                   className="flex-1 h-9 flex items-center justify-center text-sm rounded-md"
-                  style={{ border: "1px solid #302B22", color: "#9E9688" }}
+                  style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
                   onClick={() => setMobileOpen(false)}
                 >
                   로그인
@@ -239,7 +241,7 @@ export function Header() {
                 <Link
                   href="/signup"
                   className="flex-1 h-9 flex items-center justify-center text-sm rounded-md font-medium"
-                  style={{ backgroundColor: "#BF9742", color: "#0C0A08" }}
+                  style={{ backgroundColor: "#D44B20", color: "#FFFFFF" }}
                   onClick={() => setMobileOpen(false)}
                 >
                   회원가입
@@ -250,7 +252,7 @@ export function Header() {
                 <Link
                   href="/studio"
                   className="flex-1 h-9 flex items-center justify-center gap-1.5 text-sm rounded-md"
-                  style={{ border: "1px solid #302B22", color: "#9E9688" }}
+                  style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
                   onClick={() => setMobileOpen(false)}
                 >
                   <PenLine className="h-3.5 w-3.5" /> 연재 관리
@@ -258,7 +260,7 @@ export function Header() {
                 <Link
                   href="/mypage"
                   className="flex-1 h-9 flex items-center justify-center gap-1.5 text-sm rounded-md"
-                  style={{ border: "1px solid #302B22", color: "#9E9688" }}
+                  style={{ border: "1px solid #E8E2D9", color: "#6B6560" }}
                   onClick={() => setMobileOpen(false)}
                 >
                   <User className="h-3.5 w-3.5" /> 마이페이지
