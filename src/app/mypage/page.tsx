@@ -144,6 +144,30 @@ function ProfileTab({
           </div>
           {/* 응원 링크 설정 */}
           <div className="pt-2 mt-2" style={{ borderTop: "1px solid #E8E2D9" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Heart className="h-3.5 w-3.5" style={{ color: "#D44B20" }} />
+              <span className="text-xs font-medium" style={{ color: "#1A1814" }}>응원 링크 설정</span>
+            </div>
+            <p className="text-[11px] leading-relaxed mb-3" style={{ color: "#6B6560" }}>
+              독자들이 소설을 읽은 후 이 링크를 통해 작가님을 후원할 수 있습니다.
+              아래 서비스에서 송금 링크를 만들어 붙여넣어 주세요.
+            </p>
+            <div className="rounded-sm p-3 mb-3 space-y-1.5" style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}>
+              <p className="text-[10px] font-semibold tracking-wide uppercase mb-1" style={{ color: "#8A8478" }}>송금 링크 만드는 법</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
+                <span className="font-medium" style={{ color: "#1A1814" }}>토스</span>{" "}
+                — 토스 앱 &gt; 더보기 &gt; 토스아이디 &gt; 송금받기 링크 복사
+                <span className="ml-1" style={{ color: "#8A8478" }}>(toss.me/닉네임)</span>
+              </p>
+              <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
+                <span className="font-medium" style={{ color: "#1A1814" }}>카카오페이</span>{" "}
+                — 카카오페이 앱 &gt; 더보기 &gt; 송금코드 &gt; 링크 복사
+              </p>
+              <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
+                <span className="font-medium" style={{ color: "#1A1814" }}>Buy Me a Coffee</span>{" "}
+                — buymeacoffee.com 가입 후 내 페이지 URL 복사
+              </p>
+            </div>
             <label className="block text-[10px] font-medium mb-1.5 tracking-wide uppercase" style={{ color: "#8A8478" }}>
               응원 링크
             </label>
@@ -157,7 +181,7 @@ function ProfileTab({
               onBlur={(e)  => (e.currentTarget.style.borderColor = "#E8E2D9")}
             />
             <label className="block text-[10px] font-medium mb-1.5 tracking-wide uppercase" style={{ color: "#8A8478" }}>
-              버튼 이름
+              버튼 이름 <span className="normal-case tracking-normal font-normal" style={{ color: "#C5BDB2" }}>· 비워두면 &quot;작가 응원하기&quot;로 표시</span>
             </label>
             <input
               value={donationLabel}
@@ -168,9 +192,6 @@ function ProfileTab({
               onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
               onBlur={(e)  => (e.currentTarget.style.borderColor = "#E8E2D9")}
             />
-            <p className="text-[11px] leading-relaxed" style={{ color: "#8A8478" }}>
-              독자들이 챕터를 읽은 후 이 링크로 응원할 수 있습니다
-            </p>
           </div>
 
           <button
