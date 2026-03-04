@@ -7,6 +7,17 @@ import { createClient } from "@/lib/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
+function translateSignupError(message: string): string {
+  if (message.includes("already registered")) return "이미 사용 중인 이메일입니다.";
+  if (message.includes("invalid") && message.toLowerCase().includes("email"))
+    return "유효하지 않은 이메일 주소입니다. 실제 사용 가능한 이메일을 입력해 주세요.";
+  if (message.includes("rate limit") || message.includes("too many"))
+    return "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.";
+  if (message.includes("password"))
+    return "비밀번호가 보안 요건을 충족하지 않습니다. 8자 이상으로 입력해 주세요.";
+  return "회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+}
+
 export default function SignupPage() {
   const router = useRouter();
 
@@ -16,6 +27,8 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,16 +60,21 @@ export default function SignupPage() {
     });
 
     if (error) {
-      if (error.message.includes("already registered")) {
-        setError("이미 사용 중인 이메일입니다.");
-      } else {
-        setError(error.message);
-      }
+      setError(translateSignupError(error.message));
       setLoading(false);
       return;
     }
 
     setDone(true);
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setResent(false);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    setResending(false);
+    if (!error) setResent(true);
   };
 
   if (done) {
@@ -81,19 +99,33 @@ export default function SignupPage() {
               >
                 가입 완료
               </h2>
-              <p className="text-sm mb-6" style={{ color: "#6B6560" }}>
-                {email}로 인증 메일을 발송했습니다.<br />
-                메일을 확인 후 로그인해 주세요.
+              <p className="text-sm mb-2" style={{ color: "#6B6560" }}>
+                <strong style={{ color: "#1A1814" }}>{email}</strong>로<br />
+                인증 메일을 발송했습니다.
               </p>
-              <Link
-                href="/login"
-                className="inline-flex items-center h-9 px-6 text-sm font-medium rounded-sm transition-colors"
-                style={{ backgroundColor: "#D44B20", color: "#FFFFFF" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#B8401A")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#D44B20")}
-              >
-                로그인하기
-              </Link>
+              <p className="text-xs mb-6" style={{ color: "#8A8478" }}>
+                메일함(스팸 포함)을 확인하신 후 인증 링크를 클릭하면<br />
+                로그인할 수 있습니다.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center h-9 px-6 text-sm font-medium rounded-sm transition-colors"
+                  style={{ backgroundColor: "#D44B20", color: "#FFFFFF" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#B8401A")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#D44B20")}
+                >
+                  로그인하기
+                </Link>
+                <button
+                  onClick={handleResend}
+                  disabled={resending || resent}
+                  className="inline-flex items-center justify-center h-9 px-6 text-xs rounded-sm transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: "#F5F1EB", color: "#6B6560", border: "1px solid #E8E2D9" }}
+                >
+                  {resent ? "인증 메일을 재발송했습니다" : resending ? "발송 중..." : "인증 메일 재발송"}
+                </button>
+              </div>
             </div>
           </div>
         </main>

@@ -16,23 +16,42 @@ function LoginPageContent() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setEmailNotConfirmed(false);
+    setResent(false);
 
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setEmailNotConfirmed(true);
+        setError("이메일 인증이 완료되지 않았습니다.");
+      } else {
+        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      }
       setLoading(false);
       return;
     }
 
     router.push(redirectTo);
     router.refresh();
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setResent(false);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    setResending(false);
+    if (!error) setResent(true);
   };
 
   return (
@@ -116,16 +135,36 @@ function LoginPageContent() {
 
               {/* Error */}
               {error && (
-                <p
+                <div
                   className="text-xs px-3 py-2 rounded-sm"
                   style={{
-                    backgroundColor: "rgba(192,84,74,0.05)",
-                    border: "1px solid rgba(192,84,74,0.15)",
-                    color: "#C0544A",
+                    backgroundColor: emailNotConfirmed ? "rgba(160,120,48,0.05)" : "rgba(192,84,74,0.05)",
+                    border: `1px solid ${emailNotConfirmed ? "rgba(160,120,48,0.2)" : "rgba(192,84,74,0.15)"}`,
+                    color: emailNotConfirmed ? "#8A6A20" : "#C0544A",
                   }}
                 >
-                  {error}
-                </p>
+                  <p>{error}</p>
+                  {emailNotConfirmed && (
+                    <div className="mt-2">
+                      <p style={{ color: "#8A8478" }}>
+                        가입 시 입력한 이메일의 메일함(스팸 포함)을 확인하고 인증 링크를 클릭해 주세요.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={resending || resent}
+                        className="mt-2 h-7 px-3 text-xs rounded-sm transition-colors disabled:opacity-50"
+                        style={{
+                          backgroundColor: resent ? "rgba(45,122,58,0.06)" : "#F5F1EB",
+                          color: resent ? "#2D7A3A" : "#6B6560",
+                          border: `1px solid ${resent ? "rgba(45,122,58,0.15)" : "#E8E2D9"}`,
+                        }}
+                      >
+                        {resent ? "인증 메일을 재발송했습니다" : resending ? "발송 중..." : "인증 메일 재발송"}
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Submit */}
