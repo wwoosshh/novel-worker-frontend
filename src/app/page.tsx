@@ -278,40 +278,6 @@ function Hero({ novel, loading }: { novel: Novel | null; loading: boolean }) {
   );
 }
 
-/* ─── Stats Bar ────────────────────────────────────── */
-function StatsBar({ total }: { total: number | null }) {
-  const stats = [
-    { label: "누적 작품",    value: total != null ? total.toLocaleString() : "—" },
-    { label: "연재 중",      value: "—" },
-    { label: "등록 작가",    value: "—" },
-    { label: "오늘 업데이트", value: "—" },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 rounded-md overflow-hidden" style={{ border: "1px solid #E8E2D9" }}>
-      {stats.map((stat, i) => (
-        <div
-          key={stat.label}
-          className="flex flex-col items-center justify-center py-4 gap-1"
-          style={{
-            backgroundColor: "#F5F1EB",
-            borderRight: i < stats.length - 1 ? "1px solid #E8E2D9" : undefined,
-          }}
-        >
-          <span
-            className="text-lg font-bold"
-            style={{ fontFamily: "'Cormorant', Georgia, serif", color: "#D44B20" }}
-          >
-            {stat.value}
-          </span>
-          <span className="text-[10px]" style={{ color: "#8A8478" }}>
-            {stat.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /* ─── Writer CTA ─────────────────────────────────────  */
 function WriterCTA() {
@@ -391,7 +357,6 @@ export default function MainPage() {
       <Header />
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-10">
         <Hero novel={featured} loading={loading} />
-        <StatsBar total={total} />
         <Section
           title="지금 인기 있는 소설"
           icon={<TrendingUp className="h-4 w-4" />}
