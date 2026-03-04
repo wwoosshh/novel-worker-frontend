@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/Header";
@@ -34,14 +35,27 @@ function NovelRow({ novel }: { novel: Novel }) {
       onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#D4C9B8")}
       onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
     >
-      {/* Cover placeholder */}
+      {/* Cover */}
       <div
-        className="shrink-0 w-10 h-[54px] rounded-sm overflow-hidden"
-        style={{ background: "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 100%)", border: "1px solid #E8E2D9" }}
+        className="relative shrink-0 w-10 h-[54px] rounded-sm overflow-hidden"
+        style={{ border: "1px solid #E8E2D9" }}
       >
-        <div className="w-full h-full flex items-center justify-center">
-          <BookOpen className="h-4 w-4" style={{ color: "#C5BDB2" }} />
-        </div>
+        {novel.cover_url ? (
+          <Image
+            src={novel.cover_url}
+            alt={novel.title}
+            fill
+            sizes="40px"
+            className="object-cover"
+          />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ background: "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 100%)" }}
+          >
+            <BookOpen className="h-4 w-4" style={{ color: "#C5BDB2" }} />
+          </div>
+        )}
       </div>
 
       {/* Main info */}

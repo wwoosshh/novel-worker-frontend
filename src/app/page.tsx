@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -202,7 +203,7 @@ function Hero({ novel, loading }: { novel: Novel | null; loading: boolean }) {
 
           <div className="flex items-center gap-2.5">
             <Link
-              href={`/novel/${novel.id}`}
+              href={`/novel/${novel.id}/chapter/1`}
               className="inline-flex items-center h-9 px-5 text-sm font-medium rounded-sm transition-colors"
               style={{ backgroundColor: "#D44B20", color: "#FFFFFF" }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#B8401A")}
@@ -237,17 +238,28 @@ function Hero({ novel, loading }: { novel: Novel | null; loading: boolean }) {
               transform: "rotate(2deg) translateY(-4px)",
             }}
           >
-            <div
-              className="w-full h-full flex items-end p-3"
-              style={{ background: "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 60%, #E8E2D9 100%)" }}
-            >
-              <span
-                className="text-[11px] font-medium leading-snug"
-                style={{ fontFamily: "'Noto Serif KR', serif", color: "rgba(26,24,20,0.5)" }}
+            {novel.cover_url ? (
+              <Image
+                src={novel.cover_url}
+                alt={novel.title}
+                fill
+                priority
+                sizes="148px"
+                className="object-cover"
+              />
+            ) : (
+              <div
+                className="w-full h-full flex items-end p-3"
+                style={{ background: "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 60%, #E8E2D9 100%)" }}
               >
-                {novel.title}
-              </span>
-            </div>
+                <span
+                  className="text-[11px] font-medium leading-snug"
+                  style={{ fontFamily: "'Noto Serif KR', serif", color: "rgba(26,24,20,0.5)" }}
+                >
+                  {novel.title}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
