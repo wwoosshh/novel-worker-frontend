@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -141,17 +142,27 @@ export default function NovelDetailPage() {
       <main className="max-w-[860px] mx-auto px-4 sm:px-6 py-8">
         {/* Hero section */}
         <div className="flex flex-col sm:flex-row gap-6 mb-8">
-          {/* Cover placeholder */}
+          {/* Cover */}
           <div
-            className="shrink-0 w-32 h-44 rounded-sm self-center sm:self-start"
+            className="shrink-0 w-32 h-44 rounded-sm self-center sm:self-start overflow-hidden"
             style={{
-              background: "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 100%)",
+              background: novel.cover_url ? undefined : "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 100%)",
               border: "1px solid #E8E2D9",
             }}
           >
-            <div className="w-full h-full flex items-center justify-center">
-              <BookOpen className="h-8 w-8" style={{ color: "#C5BDB2" }} />
-            </div>
+            {novel.cover_url ? (
+              <Image
+                src={novel.cover_url}
+                alt={novel.title}
+                width={128}
+                height={176}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <BookOpen className="h-8 w-8" style={{ color: "#C5BDB2" }} />
+              </div>
+            )}
           </div>
 
           {/* Info */}

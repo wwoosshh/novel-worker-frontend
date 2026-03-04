@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import ImageExtension from "@tiptap/extension-image";
+import { uploadImage } from "@/lib/uploadImage";
 import { useAuth } from "@/hooks/useAuth";
 import { novelsApi, chaptersApi, macrosApi, type Novel, type Chapter, type Macro } from "@/lib/api";
 import { ChapterSidebar } from "@/components/editor/ChapterSidebar";
@@ -50,11 +52,16 @@ export default function EditorWorkspacePage() {
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
 
+  // Ref to avoid stale closure in editorProps handlers
+  const activeChapterRef = useRef(activeChapter);
+  activeChapterRef.current = activeChapter;
+
   // Shared Tiptap editor instance
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ horizontalRule: false }),
       HorizontalRule,
+      ImageExtension.configure({ inline: false, allowBase64: false }),
       Placeholder.configure({
         placeholder: "이야기를 시작하세요...",
       }),
@@ -62,6 +69,45 @@ export default function EditorWorkspacePage() {
     editorProps: {
       attributes: {
         class: "novel-reader min-h-[60vh] px-1 py-2 focus:outline-none",
+      },
+      handleDrop(view, event, _slice, moved) {
+        if (moved || !event.dataTransfer?.files?.length) return false;
+        const file = event.dataTransfer.files[0];
+        if (!file.type.startsWith("image/")) return false;
+        event.preventDefault();
+        const chId = activeChapterRef.current?.id ?? "misc";
+        const folder = `chapters/${novelId}/${chId}`;
+        uploadImage(file, folder).then((url) => {
+          const { schema } = view.state;
+          const node = schema.nodes.image.create({ src: url });
+          const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+          if (pos) {
+            const tr = view.state.tr.insert(pos.pos, node);
+            view.dispatch(tr);
+          }
+        }).catch(() => {});
+        return true;
+      },
+      handlePaste(view, event) {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        for (const item of Array.from(items)) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            if (!file) continue;
+            event.preventDefault();
+            const chId = activeChapterRef.current?.id ?? "misc";
+            const folder = `chapters/${novelId}/${chId}`;
+            uploadImage(file, folder).then((url) => {
+              const { schema } = view.state;
+              const node = schema.nodes.image.create({ src: url });
+              const tr = view.state.tr.replaceSelectionWith(node);
+              view.dispatch(tr);
+            }).catch(() => {});
+            return true;
+          }
+        }
+        return false;
       },
     },
   });
@@ -280,6 +326,7 @@ export default function EditorWorkspacePage() {
             isPublic={activeChapter?.is_public ?? false}
             onTogglePublish={togglePublish}
             macros={macros}
+            novelId={novelId}
           />
         </div>
 

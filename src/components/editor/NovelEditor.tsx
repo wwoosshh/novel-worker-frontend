@@ -19,6 +19,7 @@ interface NovelEditorProps {
   isPublic: boolean;
   onTogglePublish: () => void;
   macros?: Macro[];
+  novelId?: string;
 }
 
 function normalizeKeyEvent(e: KeyboardEvent): string {
@@ -41,6 +42,7 @@ export function NovelEditor({
   isPublic,
   onTogglePublish,
   macros = [],
+  novelId,
 }: NovelEditorProps) {
   const saveRef = useRef(onSave);
   saveRef.current = onSave;
@@ -160,7 +162,7 @@ export function NovelEditor({
         className="flex items-center justify-between px-4 sm:px-8 py-2 mx-4 sm:mx-8 rounded-sm"
         style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}
       >
-        <EditorToolbar editor={editor} />
+        <EditorToolbar editor={editor} novelId={novelId} chapterId={chapter?.id} />
       </div>
 
       {/* Editor body */}

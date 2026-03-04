@@ -251,3 +251,16 @@
 .ProseMirror em {
   font-style: italic;
 }
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1em 0;
+  cursor: default;
+}
+
+.ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #D44B20;
+  outline-offset: 2px;
+}

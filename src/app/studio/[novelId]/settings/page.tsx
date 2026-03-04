@@ -39,7 +39,10 @@ import {
   X,
   Pin,
   Blocks,
+  ImagePlus,
 } from "lucide-react";
+import { uploadImage, deleteImage, UploadError } from "@/lib/uploadImage";
+import Image from "next/image";
 import { MacroBuilderDialog } from "@/components/macro/MacroBuilderDialog";
 import type { MacroAction } from "@/lib/macroTypes";
 
@@ -78,10 +81,36 @@ function BasicInfoTab({
   const [tags, setTags] = useState(novel.tags.join(", "));
   const [status, setStatus] = useState<Novel["status"]>(novel.status);
   const [isPublic, setIsPublic] = useState(novel.is_public ?? true);
+  const [coverUrl, setCoverUrl] = useState<string | null>(novel.cover_url);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [coverError, setCoverError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverError(null);
+    setCoverUploading(true);
+    try {
+      const url = await uploadImage(file, `covers/${novelId}`);
+      setCoverUrl(url);
+    } catch (err) {
+      setCoverError(err instanceof UploadError ? err.message : "업로드에 실패했습니다.");
+    } finally {
+      setCoverUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleCoverRemove = async () => {
+    if (coverUrl) {
+      await deleteImage(coverUrl).catch(() => {});
+      setCoverUrl(null);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -97,6 +126,7 @@ function BasicInfoTab({
         tags: parsedTags,
         status,
         is_public: isPublic,
+        cover_url: coverUrl,
       });
       onNovelUpdate(res.data);
     } catch (err) {
@@ -132,6 +162,70 @@ function BasicInfoTab({
           onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
           onBlur={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
         />
+      </div>
+
+      {/* Cover image */}
+      <div>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: "#1A1814" }}>
+          표지 이미지
+        </label>
+        <div className="flex items-start gap-4">
+          {/* Preview */}
+          <div
+            className="w-24 h-32 rounded-sm overflow-hidden shrink-0 flex items-center justify-center"
+            style={{
+              background: coverUrl ? undefined : "linear-gradient(150deg, #E8E2D9 0%, #D4C9B8 100%)",
+              border: "1px solid #E8E2D9",
+            }}
+          >
+            {coverUrl ? (
+              <Image
+                src={coverUrl}
+                alt="표지"
+                width={96}
+                height={128}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <ImagePlus className="h-6 w-6" style={{ color: "#C5BDB2" }} />
+            )}
+          </div>
+          {/* Buttons */}
+          <div className="flex flex-col gap-2">
+            <label
+              className="flex items-center gap-1.5 h-8 px-3 text-xs rounded-sm transition-colors cursor-pointer"
+              style={{ border: "1px solid #E8E2D9", color: "#6B6560", backgroundColor: "#F5F1EB" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#D4C9B8")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
+            >
+              <ImagePlus className="h-3.5 w-3.5" />
+              {coverUploading ? "업로드 중..." : "이미지 선택"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleCoverUpload}
+                disabled={coverUploading}
+              />
+            </label>
+            {coverUrl && (
+              <button
+                onClick={handleCoverRemove}
+                className="flex items-center gap-1.5 h-8 px-3 text-xs rounded-sm transition-colors"
+                style={{ border: "1px solid #FCA5A5", color: "#DC2626" }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                표지 삭제
+              </button>
+            )}
+            {coverError && (
+              <p className="text-[10px]" style={{ color: "#DC2626" }}>{coverError}</p>
+            )}
+            <p className="text-[10px]" style={{ color: "#C5BDB2" }}>
+              JPG, PNG, GIF, WebP (최대 5MB)
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Synopsis */}

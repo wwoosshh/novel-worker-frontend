@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import ImageExtension from "@tiptap/extension-image";
 import { chaptersApi, type Chapter } from "@/lib/api";
 import { ArrowLeft, ChevronLeft, ChevronRight, List, Loader2 } from "lucide-react";
 
@@ -24,6 +25,7 @@ export default function ChapterReaderPage() {
     extensions: [
       StarterKit.configure({ horizontalRule: false }),
       HorizontalRule,
+      ImageExtension.configure({ inline: false }),
     ],
     editorProps: {
       attributes: {
