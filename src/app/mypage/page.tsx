@@ -152,21 +152,26 @@ function ProfileTab({
               독자들이 소설을 읽은 후 이 링크를 통해 작가님을 후원할 수 있습니다.
               아래 서비스에서 송금 링크를 만들어 붙여넣어 주세요.
             </p>
-            <div className="rounded-sm p-3 mb-3 space-y-1.5" style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}>
-              <p className="text-[10px] font-semibold tracking-wide uppercase mb-1" style={{ color: "#8A8478" }}>송금 링크 만드는 법</p>
-              <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
-                <span className="font-medium" style={{ color: "#1A1814" }}>토스</span>{" "}
-                — 토스 앱 &gt; 더보기 &gt; 토스아이디 &gt; 송금받기 링크 복사
-                <span className="ml-1" style={{ color: "#8A8478" }}>(toss.me/닉네임)</span>
-              </p>
-              <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
-                <span className="font-medium" style={{ color: "#1A1814" }}>카카오페이</span>{" "}
-                — 카카오페이 앱 &gt; 더보기 &gt; 송금코드 &gt; 링크 복사
-              </p>
-              <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
-                <span className="font-medium" style={{ color: "#1A1814" }}>Buy Me a Coffee</span>{" "}
-                — buymeacoffee.com 가입 후 내 페이지 URL 복사
-              </p>
+            <div className="rounded-sm p-3 mb-3 space-y-2.5" style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}>
+              <p className="text-[10px] font-semibold tracking-wide uppercase" style={{ color: "#8A8478" }}>송금 링크 만드는 법</p>
+              <div className="space-y-0.5">
+                <p className="text-[11px] font-medium" style={{ color: "#1A1814" }}>토스 (추천)</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
+                  토스 앱 &gt; 하단 &quot;전체&quot; 탭 &gt; 송금 &gt; &quot;내 토스아이디&quot; &gt; 아이디 생성
+                </p>
+                <p className="text-[11px]" style={{ color: "#8A8478" }}>
+                  완성된 링크: https://toss.me/내아이디
+                </p>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-[11px] font-medium" style={{ color: "#1A1814" }}>카카오페이</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
+                  카카오톡 &gt; 하단 &quot;더보기(···)&quot; 탭 &gt; 상단 &quot;코드스캔&quot; &gt; 하단 &quot;송금코드&quot; 버튼
+                </p>
+                <p className="text-[11px]" style={{ color: "#8A8478" }}>
+                  QR코드만 지원되어 링크 변환이 필요합니다 (토스 추천)
+                </p>
+              </div>
             </div>
             <label className="block text-[10px] font-medium mb-1.5 tracking-wide uppercase" style={{ color: "#8A8478" }}>
               응원 링크
