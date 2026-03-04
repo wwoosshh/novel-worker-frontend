@@ -34,16 +34,23 @@ function ProfileTab({
   userEmail: string;
   onUpdated: (p: Profile) => void;
 }) {
-  const [editing,     setEditing]     = useState(false);
-  const [displayName, setDisplayName] = useState(profile.display_name);
-  const [bio,         setBio]         = useState(profile.bio ?? "");
-  const [saving,      setSaving]      = useState(false);
-  const [saved,       setSaved]       = useState(false);
+  const [editing,       setEditing]       = useState(false);
+  const [displayName,   setDisplayName]   = useState(profile.display_name);
+  const [bio,           setBio]           = useState(profile.bio ?? "");
+  const [donationLink,  setDonationLink]  = useState(profile.donation_link ?? "");
+  const [donationLabel, setDonationLabel] = useState(profile.donation_label ?? "");
+  const [saving,        setSaving]        = useState(false);
+  const [saved,         setSaved]         = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await usersApi.updateMe({ display_name: displayName, bio });
+      const res = await usersApi.updateMe({
+        display_name: displayName,
+        bio,
+        donation_link: donationLink.trim() || null,
+        donation_label: donationLabel.trim() || null,
+      });
       onUpdated(res.data);
       setEditing(false);
       setSaved(true);
@@ -135,6 +142,37 @@ function ProfileTab({
               onBlur={(e)  => (e.currentTarget.style.borderColor = "#E8E2D9")}
             />
           </div>
+          {/* 응원 링크 설정 */}
+          <div className="pt-2 mt-2" style={{ borderTop: "1px solid #E8E2D9" }}>
+            <label className="block text-[10px] font-medium mb-1.5 tracking-wide uppercase" style={{ color: "#8A8478" }}>
+              응원 링크
+            </label>
+            <input
+              value={donationLink}
+              onChange={(e) => setDonationLink(e.target.value)}
+              placeholder="https://toss.me/닉네임"
+              className="w-full h-9 px-3 text-sm rounded-sm outline-none transition-all mb-3"
+              style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8E2D9", color: "#1A1814", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
+              onBlur={(e)  => (e.currentTarget.style.borderColor = "#E8E2D9")}
+            />
+            <label className="block text-[10px] font-medium mb-1.5 tracking-wide uppercase" style={{ color: "#8A8478" }}>
+              버튼 이름
+            </label>
+            <input
+              value={donationLabel}
+              onChange={(e) => setDonationLabel(e.target.value)}
+              placeholder="토스로 응원하기"
+              className="w-full h-9 px-3 text-sm rounded-sm outline-none transition-all mb-2"
+              style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8E2D9", color: "#1A1814", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
+              onBlur={(e)  => (e.currentTarget.style.borderColor = "#E8E2D9")}
+            />
+            <p className="text-[11px] leading-relaxed" style={{ color: "#8A8478" }}>
+              독자들이 챕터를 읽은 후 이 링크로 응원할 수 있습니다
+            </p>
+          </div>
+
           <button
             onClick={handleSave}
             disabled={saving}

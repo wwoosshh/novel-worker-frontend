@@ -42,6 +42,8 @@ export interface Novel {
   view_count: number;
   author_name: string;
   author_username: string;
+  author_donation_link?: string | null;
+  author_donation_label?: string | null;
   latest_chapter: number | null;
   synopsis?: string;
   is_public?: boolean;
@@ -56,6 +58,8 @@ export interface Profile {
   display_name: string;
   bio: string | null;
   avatar_url: string | null;
+  donation_link: string | null;
+  donation_label: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -74,6 +78,9 @@ export interface Chapter {
   updated_at: string;
   novel_title?: string;
   novel_chapter_count?: number;
+  author_name?: string;
+  author_donation_link?: string | null;
+  author_donation_label?: string | null;
 }
 
 export interface Macro {
@@ -274,7 +281,7 @@ export const usersApi = {
     return apiFetch<{ data: Profile }>(`/api/users/me`);
   },
 
-  updateMe(data: { display_name?: string; bio?: string }) {
+  updateMe(data: { display_name?: string; bio?: string; donation_link?: string | null; donation_label?: string | null }) {
     return apiFetch<{ data: Profile }>(`/api/users/me`, {
       method: "PATCH",
       body: JSON.stringify(data),

@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Bell,
   BellOff,
+  Heart,
   Loader2,
   Megaphone,
   Pin,
@@ -243,6 +244,26 @@ export default function NovelDetailPage() {
                 </>
               )}
             </button>
+
+            {/* Donation button */}
+            {novel.author_donation_link && novel.author_donation_link.startsWith("https://") && (
+              <a
+                href={novel.author_donation_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 h-9 px-4 text-sm font-medium rounded-sm transition-all"
+                style={{
+                  border: "1px solid rgba(212,75,32,0.2)",
+                  backgroundColor: "rgba(212,75,32,0.04)",
+                  color: "#D44B20",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.1)"; e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.04)"; e.currentTarget.style.borderColor = "rgba(212,75,32,0.2)"; }}
+              >
+                <Heart className="h-3.5 w-3.5" />
+                {novel.author_donation_label || "작가 응원하기"}
+              </a>
+            )}
           </div>
         </div>
 

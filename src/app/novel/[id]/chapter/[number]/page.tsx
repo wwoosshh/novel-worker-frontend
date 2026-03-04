@@ -8,7 +8,7 @@ import StarterKit from "@tiptap/starter-kit";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import ImageExtension from "@tiptap/extension-image";
 import { chaptersApi, type Chapter } from "@/lib/api";
-import { ArrowLeft, ChevronLeft, ChevronRight, List, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, List, Loader2 } from "lucide-react";
 
 export default function ChapterReaderPage() {
   const params = useParams();
@@ -158,6 +158,36 @@ export default function ChapterReaderPage() {
 
           {/* Content */}
           <EditorContent editor={editor} />
+
+          {/* Donation CTA */}
+          {chapter.author_donation_link && chapter.author_donation_link.startsWith("https://") && (
+            <div className="mt-12 mb-4 flex flex-col items-center gap-4">
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex-1 h-px" style={{ backgroundColor: "#E8E2D9" }} />
+                <Heart className="h-4 w-4" style={{ color: "#D44B20", opacity: 0.5 }} />
+                <div className="flex-1 h-px" style={{ backgroundColor: "#E8E2D9" }} />
+              </div>
+              <p className="text-sm text-center" style={{ color: "#6B6560", fontFamily: "'Noto Serif KR', serif" }}>
+                이 이야기가 마음에 드셨나요?
+              </p>
+              <a
+                href={chapter.author_donation_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 h-9 px-5 text-sm font-medium rounded-sm transition-all"
+                style={{
+                  border: "1px solid rgba(212,75,32,0.25)",
+                  backgroundColor: "rgba(212,75,32,0.04)",
+                  color: "#D44B20",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.1)"; e.currentTarget.style.borderColor = "rgba(212,75,32,0.4)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.04)"; e.currentTarget.style.borderColor = "rgba(212,75,32,0.25)"; }}
+              >
+                <Heart className="h-3.5 w-3.5" />
+                {chapter.author_donation_label || "작가 응원하기"}
+              </a>
+            </div>
+          )}
         </div>
       </main>
 
