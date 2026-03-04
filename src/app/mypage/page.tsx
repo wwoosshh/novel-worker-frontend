@@ -150,26 +150,25 @@ function ProfileTab({
             </div>
             <p className="text-[11px] leading-relaxed mb-3" style={{ color: "#6B6560" }}>
               독자들이 소설을 읽은 후 이 링크를 통해 작가님을 후원할 수 있습니다.
-              아래 서비스에서 송금 링크를 만들어 붙여넣어 주세요.
             </p>
-            <div className="rounded-sm p-3 mb-3 space-y-2.5" style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}>
-              <p className="text-[10px] font-semibold tracking-wide uppercase" style={{ color: "#8A8478" }}>송금 링크 만드는 법</p>
+            <div className="rounded-sm p-3 mb-3 space-y-3" style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}>
+              <p className="text-[10px] font-semibold tracking-wide uppercase" style={{ color: "#8A8478" }}>어떤 링크를 넣을 수 있나요?</p>
               <div className="space-y-0.5">
-                <p className="text-[11px] font-medium" style={{ color: "#1A1814" }}>토스 (추천)</p>
-                <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
-                  토스 앱 &gt; 하단 &quot;전체&quot; 탭 &gt; 송금 &gt; &quot;내 토스아이디&quot; &gt; 아이디 생성
-                </p>
+                <p className="text-[11px] font-medium" style={{ color: "#1A1814" }}>카카오페이 오픈채팅 송금 (추천)</p>
+                <ol className="text-[11px] leading-[1.8] list-decimal list-inside" style={{ color: "#6B6560" }}>
+                  <li>카카오톡 &gt; 하단 &quot;채팅&quot; 탭 &gt; 상단 &quot;+&quot; &gt; &quot;오픈채팅&quot;</li>
+                  <li>오픈프로필을 만들고 1:1 채팅 허용</li>
+                  <li>생성된 오픈채팅방 &gt; 우측 상단 &quot;≡&quot; &gt; 링크 복사</li>
+                </ol>
                 <p className="text-[11px]" style={{ color: "#8A8478" }}>
-                  완성된 링크: https://toss.me/내아이디
+                  독자가 링크를 눌러 채팅방에 입장한 뒤 카카오페이로 송금할 수 있습니다
                 </p>
               </div>
+              <div className="h-px" style={{ backgroundColor: "#E8E2D9" }} />
               <div className="space-y-0.5">
-                <p className="text-[11px] font-medium" style={{ color: "#1A1814" }}>카카오페이</p>
+                <p className="text-[11px] font-medium" style={{ color: "#1A1814" }}>계좌이체 안내 페이지</p>
                 <p className="text-[11px] leading-relaxed" style={{ color: "#6B6560" }}>
-                  카카오톡 &gt; 하단 &quot;더보기(···)&quot; 탭 &gt; 상단 &quot;코드스캔&quot; &gt; 하단 &quot;송금코드&quot; 버튼
-                </p>
-                <p className="text-[11px]" style={{ color: "#8A8478" }}>
-                  QR코드만 지원되어 링크 변환이 필요합니다 (토스 추천)
+                  본인의 계좌번호를 안내하는 블로그/노션 페이지 등의 URL을 넣을 수도 있습니다.
                 </p>
               </div>
             </div>
@@ -179,7 +178,7 @@ function ProfileTab({
             <input
               value={donationLink}
               onChange={(e) => setDonationLink(e.target.value)}
-              placeholder="https://toss.me/닉네임"
+              placeholder="https://open.kakao.com/o/..."
               className="w-full h-9 px-3 text-sm rounded-sm outline-none transition-all mb-3"
               style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8E2D9", color: "#1A1814", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
@@ -191,7 +190,7 @@ function ProfileTab({
             <input
               value={donationLabel}
               onChange={(e) => setDonationLabel(e.target.value)}
-              placeholder="토스로 응원하기"
+              placeholder="카카오페이로 응원하기"
               className="w-full h-9 px-3 text-sm rounded-sm outline-none transition-all mb-2"
               style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8E2D9", color: "#1A1814", fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
