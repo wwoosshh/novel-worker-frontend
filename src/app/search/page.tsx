@@ -103,6 +103,20 @@ function SearchPageContent() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Sync state when URL search params change (e.g. Header genre nav clicks)
+  useEffect(() => {
+    const urlGenre  = searchParams.get("genre") ?? "전체";
+    const urlStatus = searchParams.get("status") ?? "";
+    const urlSort   = (searchParams.get("sort") as NovelsParams["sort"]) ?? "popular";
+    const urlQ      = searchParams.get("q") ?? "";
+
+    setGenre(urlGenre);
+    setStatus(urlStatus);
+    setSort(urlSort);
+    setQuery(urlQ);
+    setInputValue(urlQ);
+  }, [searchParams]);
+
   const fetchNovels = useCallback(async () => {
     setLoading(true);
     try {

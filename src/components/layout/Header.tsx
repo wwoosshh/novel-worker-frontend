@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Search, PenLine, User, Menu, X } from "lucide-react";
@@ -16,6 +16,63 @@ const GENRE_NAV = [
   { label: "공포",   href: "/search?genre=공포" },
   { label: "완결",   href: "/search?status=completed" },
 ];
+
+/* ─── Genre Nav (uses useSearchParams, needs Suspense) ─── */
+function GenreNav() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  return (
+    <nav className="flex h-9 items-center gap-0.5 overflow-x-auto hide-scrollbar">
+      {GENRE_NAV.map((item) => {
+        const url = new URL(item.href, "http://x");
+        const itemGenre = url.searchParams.get("genre");
+        const itemStatus = url.searchParams.get("status");
+        const isActive =
+          pathname === "/search" &&
+          (itemGenre
+            ? searchParams.get("genre") === itemGenre
+            : itemStatus
+              ? searchParams.get("status") === itemStatus
+              : false);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="shrink-0 px-3 h-7 flex items-center text-xs rounded transition-all whitespace-nowrap"
+            style={{
+              color: isActive ? "#D44B20" : "#6B6560",
+              backgroundColor: isActive ? "rgba(212,75,32,0.06)" : "transparent",
+              fontWeight: isActive ? 500 : 400,
+            }}
+            onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = "#1A1814"; }}
+            onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = "#6B6560"; }}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* ─── Fallback genre nav (no active highlight) ─── */
+function GenreNavFallback() {
+  return (
+    <nav className="flex h-9 items-center gap-0.5 overflow-x-auto hide-scrollbar">
+      {GENRE_NAV.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="shrink-0 px-3 h-7 flex items-center text-xs rounded transition-all whitespace-nowrap"
+          style={{ color: "#6B6560" }}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -172,33 +229,9 @@ export function Header() {
           </div>
 
           {/* Genre nav */}
-          <nav className="flex h-9 items-center gap-0.5 overflow-x-auto hide-scrollbar">
-            {GENRE_NAV.map((item) => {
-              const isActive = pathname + (typeof window !== "undefined" ? window.location.search : "") === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="shrink-0 px-3 h-7 flex items-center text-xs rounded transition-all whitespace-nowrap"
-                  style={{
-                    color: isActive ? "#D44B20" : "#6B6560",
-                    backgroundColor: isActive
-                      ? "rgba(212,75,32,0.06)"
-                      : "transparent",
-                    fontWeight: isActive ? 500 : 400,
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.color = "#1A1814";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.color = "#6B6560";
-                  }}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+          <Suspense fallback={<GenreNavFallback />}>
+            <GenreNav />
+          </Suspense>
         </div>
       </div>
 
