@@ -20,6 +20,31 @@ export default function ChapterReaderPage() {
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef<string | null>(null);
 
+  /* ─── 콘텐츠 보호 (JS 2차 방어) ─── */
+  useEffect(() => {
+    const prevent = (e: Event) => e.preventDefault();
+    const preventKeys = (e: KeyboardEvent) => {
+      // Ctrl+C, Ctrl+A, Ctrl+P, Ctrl+S
+      if ((e.ctrlKey || e.metaKey) && ["c","a","p","s"].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+      // PrintScreen
+      if (e.key === "PrintScreen") e.preventDefault();
+    };
+    document.addEventListener("copy", prevent);
+    document.addEventListener("cut", prevent);
+    document.addEventListener("contextmenu", prevent);
+    document.addEventListener("dragstart", prevent);
+    document.addEventListener("keydown", preventKeys);
+    return () => {
+      document.removeEventListener("copy", prevent);
+      document.removeEventListener("cut", prevent);
+      document.removeEventListener("contextmenu", prevent);
+      document.removeEventListener("dragstart", prevent);
+      document.removeEventListener("keydown", preventKeys);
+    };
+  }, []);
+
   const editor = useEditor({
     editable: false,
     extensions: [
@@ -104,6 +129,27 @@ export default function ChapterReaderPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#FDFBF7" }}>
+      {/* CSS 1차 방어: JS 꺼도 동작 */}
+      <style>{`
+        .novel-protected {
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+          -webkit-touch-callout: none;
+        }
+        @media print {
+          .novel-protected { display: none !important; }
+          body::after {
+            content: "이 콘텐츠는 저작권 보호를 위해 인쇄할 수 없습니다.";
+            display: block;
+            text-align: center;
+            padding: 4rem 2rem;
+            font-size: 1rem;
+            color: #8A8478;
+          }
+        }
+      `}</style>
       {/* Top nav */}
       <header
         className="sticky top-0 z-40 border-b"
@@ -141,7 +187,7 @@ export default function ChapterReaderPage() {
       </header>
 
       {/* Reader content */}
-      <main className="flex-1 py-8 sm:py-12">
+      <main className="flex-1 py-8 sm:py-12 novel-protected">
         <div className="max-w-[720px] mx-auto px-4 sm:px-6">
           {/* Chapter header */}
           <div className="mb-8 text-center">
