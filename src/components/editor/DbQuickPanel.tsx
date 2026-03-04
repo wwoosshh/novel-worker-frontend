@@ -76,7 +76,7 @@ function InlineForm({
         style={{ color: "#8A8478" }}
       >
         {showFields ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-        필드 {showFields ? "접기" : "펼치기"}
+        속성 {showFields ? "접기" : "펼치기"}
       </button>
 
       {showFields && (
@@ -86,14 +86,14 @@ function InlineForm({
               <input
                 value={f.key}
                 onChange={(e) => { const n = [...fieldRows]; n[i] = { ...n[i], key: e.target.value }; setFieldRows(n); }}
-                placeholder="키"
+                placeholder="속성"
                 className="w-16 h-6 px-1.5 text-[10px] rounded-sm outline-none"
                 style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
               />
               <input
                 value={f.value}
                 onChange={(e) => { const n = [...fieldRows]; n[i] = { ...n[i], value: e.target.value }; setFieldRows(n); }}
-                placeholder="값"
+                placeholder="설명"
                 className="flex-1 min-w-0 h-6 px-1.5 text-[10px] rounded-sm outline-none"
                 style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
               />
@@ -116,7 +116,7 @@ function InlineForm({
             onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
           >
             <Plus className="h-2.5 w-2.5" />
-            필드 추가
+            속성 추가
           </button>
         </div>
       )}
@@ -186,7 +186,7 @@ function EntryRow({
               onClick={() => setExpanded(!expanded)}
               className="h-5 w-5 flex items-center justify-center rounded-sm transition-colors"
               style={{ color: "#8A8478" }}
-              title="필드 보기"
+              title="속성 보기"
             >
               {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </button>

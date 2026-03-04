@@ -665,7 +665,7 @@ function SettingsDbTab({ novelId }: { novelId: string }) {
             </div>
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "#1A1814" }}>
-                필드
+                속성
               </label>
               <div className="space-y-1.5">
                 {formFields.map((field, i) => (
@@ -677,7 +677,7 @@ function SettingsDbTab({ novelId }: { novelId: string }) {
                         next[i] = { ...next[i], key: e.target.value };
                         setFormFields(next);
                       }}
-                      placeholder="키"
+                      placeholder="속성"
                       className="w-28 h-8 px-2 text-xs rounded-sm outline-none"
                       style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
                     />
@@ -688,7 +688,7 @@ function SettingsDbTab({ novelId }: { novelId: string }) {
                         next[i] = { ...next[i], value: e.target.value };
                         setFormFields(next);
                       }}
-                      placeholder="값"
+                      placeholder="설명"
                       className="flex-1 h-8 px-2 text-xs rounded-sm outline-none"
                       style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
                     />
@@ -714,7 +714,7 @@ function SettingsDbTab({ novelId }: { novelId: string }) {
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
               >
                 <Plus className="h-3 w-3" />
-                필드 추가
+                속성 추가
               </button>
             </div>
           </div>
