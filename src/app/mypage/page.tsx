@@ -296,10 +296,35 @@ function SubscriptionsTab({ subs }: { subs: Novel[] }) {
 }
 
 /* ─── Notifications Tab ──────────────────────────────── */
-function NotificationsTab() {
-  const [settings, setSettings] = useState({
-    new_chapter: true, comments: false, announcements: true, marketing: false,
+function NotificationsTab({
+  profile,
+  onUpdated,
+}: {
+  profile: Profile;
+  onUpdated: (p: Profile) => void;
+}) {
+  const defaults = { new_chapter: true, comments: true, announcements: true, marketing: false };
+  const [settings, setSettings] = useState<Record<string, boolean>>({
+    ...defaults,
+    ...(profile.notification_settings ?? {}),
   });
+  const [saving, setSaving] = useState(false);
+
+  const handleToggle = async (key: string) => {
+    const next = { ...settings, [key]: !settings[key] };
+    setSettings(next);
+    setSaving(true);
+    try {
+      const res = await usersApi.updateMe({ notification_settings: next });
+      onUpdated(res.data);
+    } catch (e) {
+      // 실패 시 롤백
+      setSettings(settings);
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const ITEMS = [
     { key: "new_chapter"   as const, label: "새 화 알림",     desc: "구독 소설에 새 화가 올라오면 알림을 받습니다" },
@@ -313,25 +338,26 @@ function NotificationsTab() {
       {ITEMS.map((item) => (
         <div
           key={item.key}
-          className="flex items-center justify-between px-4 py-3.5 rounded-sm"
+          className="flex items-center px-4 py-3.5 rounded-sm gap-3"
           style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}
         >
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-medium mb-0.5" style={{ color: "#1A1814" }}>{item.label}</p>
             <p className="text-[11px]" style={{ color: "#8A8478" }}>{item.desc}</p>
           </div>
           <button
-            onClick={() => setSettings((s) => ({ ...s, [item.key]: !s[item.key] }))}
+            onClick={() => handleToggle(item.key)}
+            disabled={saving}
             className="relative shrink-0 w-10 h-5 rounded-full transition-all"
             style={{ backgroundColor: settings[item.key] ? "rgba(212,75,32,0.6)" : "#E8E2D9" }}
             aria-checked={settings[item.key]}
             role="switch"
           >
             <span
-              className="absolute top-0.5 h-4 w-4 rounded-full transition-transform"
+              className="absolute left-0 top-0.5 h-4 w-4 rounded-full transition-transform"
               style={{
                 backgroundColor: settings[item.key] ? "#D44B20" : "#8A8478",
-                transform: settings[item.key] ? "translateX(20px)" : "translateX(2px)",
+                transform: settings[item.key] ? "translateX(22px)" : "translateX(2px)",
               }}
             />
           </button>
@@ -453,7 +479,7 @@ export default function MyPage() {
   const tabContent: Record<Tab, React.ReactNode> = {
     profile:       <ProfileTab profile={profile} novels={novels} userEmail={user.email ?? ""} onUpdated={setProfile} />,
     subscriptions: <SubscriptionsTab subs={subs} />,
-    notifications: <NotificationsTab />,
+    notifications: <NotificationsTab profile={profile} onUpdated={setProfile} />,
     account:       <AccountTab userEmail={user.email ?? ""} />,
   };
 

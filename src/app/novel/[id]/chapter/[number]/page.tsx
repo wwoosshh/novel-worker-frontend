@@ -7,18 +7,25 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import ImageExtension from "@tiptap/extension-image";
-import { chaptersApi, type Chapter } from "@/lib/api";
-import { ArrowLeft, ChevronLeft, ChevronRight, Heart, List, Loader2 } from "lucide-react";
+import { chaptersApi, commentsApi, type Chapter, type Comment } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, List, Loader2, MessageCircle, Trash2, Send } from "lucide-react";
 
 export default function ChapterReaderPage() {
   const params = useParams();
   const novelId = params.id as string;
   const chapterNumber = parseInt(params.number as string, 10);
 
+  const { user } = useAuth();
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchedRef = useRef<string | null>(null);
+
+  // 댓글 상태
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   /* ─── 콘텐츠 보호 (JS 2차 방어) ─── */
   useEffect(() => {
@@ -68,6 +75,13 @@ export default function ChapterReaderPage() {
       try {
         const chapterRes = await chaptersApi.get(novelId, chapterNumber);
         setChapter(chapterRes.data);
+        // 댓글 로드
+        try {
+          const commentsRes = await commentsApi.list(novelId, chapterRes.data.id);
+          setComments(commentsRes.data);
+        } catch {
+          // 댓글 로드 실패는 무시
+        }
       } catch (err) {
         console.error("Failed to load chapter:", err);
         setError("챕터를 불러올 수 없습니다.");
@@ -236,6 +250,138 @@ export default function ChapterReaderPage() {
           )}
         </div>
       </main>
+
+      {/* 댓글 섹션 — novel-protected 밖 (복사 가능) */}
+      {chapter && (
+        <section className="border-t" style={{ borderColor: "#E8E2D9", backgroundColor: "#FDFBF7" }}>
+          <div className="max-w-[720px] mx-auto px-4 sm:px-6 py-8">
+            <div className="flex items-center gap-2 mb-6">
+              <MessageCircle className="h-4 w-4" style={{ color: "#D44B20" }} />
+              <h2
+                className="text-base font-bold"
+                style={{ fontFamily: "'Cormorant', 'Noto Serif KR', Georgia, serif", color: "#1A1814" }}
+              >
+                댓글 {comments.length > 0 && <span className="text-sm font-normal" style={{ color: "#8A8478" }}>{comments.length}</span>}
+              </h2>
+            </div>
+
+            {/* 댓글 입력 */}
+            {user ? (
+              <div className="mb-6">
+                <textarea
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder="댓글을 남겨주세요..."
+                  rows={3}
+                  className="w-full px-3 py-2.5 text-sm rounded-sm outline-none transition-all resize-none"
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid #E8E2D9",
+                    color: "#1A1814",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    lineHeight: 1.7,
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(212,75,32,0.35)")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#E8E2D9")}
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={async () => {
+                      if (!commentText.trim() || submitting) return;
+                      setSubmitting(true);
+                      try {
+                        const res = await commentsApi.create(novelId, chapter.id, { content: commentText.trim() });
+                        setComments((prev) => [...prev, res.data]);
+                        setCommentText("");
+                      } catch (err) {
+                        console.error("Failed to create comment:", err);
+                      } finally {
+                        setSubmitting(false);
+                      }
+                    }}
+                    disabled={!commentText.trim() || submitting}
+                    className="flex items-center gap-1.5 h-8 px-4 text-xs font-medium rounded-sm transition-colors disabled:opacity-40"
+                    style={{ backgroundColor: "#D44B20", color: "#FFFFFF" }}
+                    onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#B8401A"; }}
+                    onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#D44B20"; }}
+                  >
+                    <Send className="h-3 w-3" />
+                    {submitting ? "등록 중..." : "등록"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="mb-6 px-4 py-3 rounded-sm text-center"
+                style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}
+              >
+                <p className="text-sm" style={{ color: "#6B6560" }}>
+                  댓글을 작성하려면{" "}
+                  <Link href="/login" className="underline" style={{ color: "#D44B20" }}>
+                    로그인
+                  </Link>
+                  이 필요합니다.
+                </p>
+              </div>
+            )}
+
+            {/* 댓글 목록 */}
+            {comments.length === 0 ? (
+              <p className="text-sm text-center py-6" style={{ color: "#8A8478" }}>
+                아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {comments.map((c) => (
+                  <div
+                    key={c.id}
+                    className="px-4 py-3 rounded-sm"
+                    style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium" style={{ color: "#1A1814" }}>
+                          {c.author_name}
+                        </span>
+                        <span className="text-[10px]" style={{ color: "#C5BDB2" }}>
+                          {new Date(c.created_at).toLocaleDateString("ko-KR", {
+                            year: "numeric", month: "short", day: "numeric",
+                            hour: "2-digit", minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      {user && (user.id === c.author_id) && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              await commentsApi.delete(novelId, chapter.id, c.id);
+                              setComments((prev) => prev.filter((x) => x.id !== c.id));
+                            } catch (err) {
+                              console.error("Failed to delete comment:", err);
+                            }
+                          }}
+                          className="text-xs flex items-center gap-1 transition-colors"
+                          style={{ color: "#8A8478" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#C0544A")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "#8A8478")}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                    <p
+                      className="text-sm leading-relaxed whitespace-pre-wrap"
+                      style={{ color: "#3A3630", fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.7 }}
+                    >
+                      {c.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Bottom navigation */}
       <nav

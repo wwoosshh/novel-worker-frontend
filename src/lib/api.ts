@@ -60,6 +60,18 @@ export interface Profile {
   avatar_url: string | null;
   donation_link: string | null;
   donation_label: string | null;
+  notification_settings: Record<string, boolean> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Comment {
+  id: string;
+  chapter_id: string;
+  author_id: string;
+  content: string;
+  author_name: string;
+  author_username: string;
   created_at: string;
   updated_at: string;
 }
@@ -274,6 +286,27 @@ export const noticesApi = {
   },
 };
 
+/* ─── Comments API ───────────────────────────────────── */
+
+export const commentsApi = {
+  list(novelId: string, chapterId: string) {
+    return apiFetch<{ data: Comment[] }>(`/api/novels/${novelId}/chapters/${chapterId}/comments`);
+  },
+
+  create(novelId: string, chapterId: string, data: { content: string }) {
+    return apiFetch<{ data: Comment }>(`/api/novels/${novelId}/chapters/${chapterId}/comments`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  delete(novelId: string, chapterId: string, id: string) {
+    return apiFetch<{ message: string }>(`/api/novels/${novelId}/chapters/${chapterId}/comments/${id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
 /* ─── Users API ──────────────────────────────────────── */
 
 export const usersApi = {
@@ -281,7 +314,7 @@ export const usersApi = {
     return apiFetch<{ data: Profile }>(`/api/users/me`);
   },
 
-  updateMe(data: { display_name?: string; bio?: string; donation_link?: string | null; donation_label?: string | null }) {
+  updateMe(data: { display_name?: string; bio?: string; donation_link?: string | null; donation_label?: string | null; notification_settings?: Record<string, boolean> }) {
     return apiFetch<{ data: Profile }>(`/api/users/me`, {
       method: "PATCH",
       body: JSON.stringify(data),
