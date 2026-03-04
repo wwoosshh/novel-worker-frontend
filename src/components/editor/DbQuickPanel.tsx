@@ -94,7 +94,7 @@ function InlineForm({
                 value={f.value}
                 onChange={(e) => { const n = [...fieldRows]; n[i] = { ...n[i], value: e.target.value }; setFieldRows(n); }}
                 placeholder="값"
-                className="flex-1 h-6 px-1.5 text-[10px] rounded-sm outline-none"
+                className="flex-1 min-w-0 h-6 px-1.5 text-[10px] rounded-sm outline-none"
                 style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
               />
               <button
