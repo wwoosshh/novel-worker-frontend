@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,7 @@ interface NovelCardProps {
   priority?: boolean;
 }
 
-export function NovelCard({ novel, className, priority }: NovelCardProps) {
+export const NovelCard = memo(function NovelCard({ novel, className, priority }: NovelCardProps) {
   const status = STATUS_CONFIG[novel.status] ?? STATUS_CONFIG.ongoing;
   const gradientClass = getPlaceholderGradient(novel.id);
 
@@ -130,4 +131,4 @@ export function NovelCard({ novel, className, priority }: NovelCardProps) {
       </div>
     </Link>
   );
-}
+});

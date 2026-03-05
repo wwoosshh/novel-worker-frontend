@@ -11,22 +11,56 @@ async function getToken(): Promise<string | null> {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = await getToken();
+  const isWrite = init?.method && init.method !== "GET";
+  const maxRetries = isWrite ? 0 : 2;
 
-  const res = await fetch(`${BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(body?.error ?? res.statusText);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const res = await fetch(`${BASE}${path}`, {
+        ...init,
+        signal: init?.signal ?? controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(init?.headers ?? {}),
+        },
+      });
+
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: res.statusText }));
+        const err = new Error(body?.error ?? res.statusText);
+        // Don't retry 4xx client errors
+        if (res.status >= 400 && res.status < 500) throw err;
+        lastError = err;
+        if (attempt < maxRetries) {
+          await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+          continue;
+        }
+        throw err;
+      }
+
+      return res.json() as T;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (lastError.name === "AbortError") {
+        throw new Error("요청 시간이 초과되었습니다.");
+      }
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+        continue;
+      }
+      throw lastError;
+    }
   }
 
-  return res.json() as T;
+  throw lastError ?? new Error("요청에 실패했습니다.");
 }
 
 /* ─── Types ─────────────────────────────────────────── */

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { NovelCard, type NovelCardData } from "@/components/novel/NovelCard";
@@ -352,6 +352,11 @@ export default function MainPage() {
   const featured = popular[0] ?? null;
   const divider  = <div className="border-t" style={{ borderColor: "#EDE8E0" }} />;
 
+  const popularCards   = useMemo(() => popular.map(toCardData), [popular]);
+  const latestCards    = useMemo(() => latest.map(toCardData), [latest]);
+  const updatedCards   = useMemo(() => updated.map(toCardData), [updated]);
+  const completedCards = useMemo(() => completed.map(toCardData), [completed]);
+
   return (
     <>
       <Header />
@@ -361,7 +366,7 @@ export default function MainPage() {
           title="지금 인기 있는 소설"
           icon={<TrendingUp className="h-4 w-4" />}
           moreHref="/search?sort=popular"
-          novels={popular.map(toCardData)}
+          novels={popularCards}
           loading={loading}
         />
         {divider}
@@ -369,7 +374,7 @@ export default function MainPage() {
           title="신규 연재"
           icon={<Zap className="h-4 w-4" />}
           moreHref="/search?sort=latest"
-          novels={latest.map(toCardData)}
+          novels={latestCards}
           loading={loading}
         />
         {divider}
@@ -377,7 +382,7 @@ export default function MainPage() {
           title="빠른 업로드"
           icon={<Clock className="h-4 w-4" />}
           moreHref="/search?sort=updated"
-          novels={updated.map(toCardData)}
+          novels={updatedCards}
           loading={loading}
         />
         {divider}
@@ -385,7 +390,7 @@ export default function MainPage() {
           title="완결 추천"
           icon={<BookCheck className="h-4 w-4" />}
           moreHref="/search?status=completed"
-          novels={completed.map(toCardData)}
+          novels={completedCards}
           loading={loading}
         />
         <WriterCTA />

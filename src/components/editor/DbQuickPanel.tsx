@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import type { Editor } from "@tiptap/react";
 import {
   Search, Users, MapPin, Shield, Package,
@@ -150,7 +150,7 @@ function InlineForm({
 }
 
 /* ─── Entry Row ───────────────────────────────────── */
-function EntryRow({
+const EntryRow = memo(function EntryRow({
   entry,
   onInsert,
   onEdit,
@@ -226,7 +226,7 @@ function EntryRow({
       )}
     </div>
   );
-}
+});
 
 /* ─── Main Panel ──────────────────────────────────── */
 export function DbQuickPanel({ novelId, editor }: DbQuickPanelProps) {
@@ -275,8 +275,11 @@ export function DbQuickPanel({ novelId, editor }: DbQuickPanelProps) {
     fetchAll();
   }, [fetchAll]);
 
-  const filtered = entries[activeType].filter((e) =>
-    e.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = useMemo(
+    () => entries[activeType].filter((e) =>
+      e.name.toLowerCase().includes(search.toLowerCase())
+    ),
+    [entries, activeType, search]
   );
 
   const insertName = (name: string) => {

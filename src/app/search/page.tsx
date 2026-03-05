@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -72,6 +72,18 @@ function SortButton({ label, active, onClick }: { label: string; active: boolean
     >
       {label}
     </button>
+  );
+}
+
+/* ─── Novel Grid (memoized card data) ────────────── */
+function NovelGrid({ novels }: { novels: Novel[] }) {
+  const cards = useMemo(() => novels.map(toCardData), [novels]);
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+      {cards.map((card, idx) => (
+        <NovelCard key={card.id} novel={card} priority={idx < 7} />
+      ))}
+    </div>
   );
 }
 
@@ -346,11 +358,8 @@ function SearchPageContent() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
-                {novels.map((novel, idx) => (
-                  <NovelCard key={novel.id} novel={toCardData(novel)} priority={idx < 7} />
-                ))}
-              </div>
+              <NovelGrid novels={novels} />
+
             )}
           </div>
         </div>
