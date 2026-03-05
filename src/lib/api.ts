@@ -119,6 +119,7 @@ export interface Chapter {
   content_text: string | null;
   is_public: boolean;
   is_paid: boolean;
+  scheduled_at: string | null;
   view_count: number;
   created_at: string;
   updated_at: string;
@@ -213,7 +214,7 @@ export const chaptersApi = {
     return apiFetch<{ data: Chapter }>(`/api/novels/${novelId}/chapters`, { method: "POST" });
   },
 
-  save(novelId: string, id: string, data: { title: string; content: Record<string, unknown>; content_text?: string; is_public: boolean }) {
+  save(novelId: string, id: string, data: { title: string; content: Record<string, unknown>; content_text?: string; is_public: boolean; scheduled_at?: string | null }) {
     return apiFetch<{ data: Chapter }>(`/api/novels/${novelId}/chapters/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),

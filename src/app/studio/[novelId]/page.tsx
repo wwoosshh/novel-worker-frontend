@@ -187,6 +187,7 @@ export default function EditorWorkspacePage() {
           content,
           content_text: contentText,
           is_public: activeChapter.is_public,
+          scheduled_at: activeChapter.scheduled_at,
         });
         setActiveChapter(res.data);
         setChapters((prev) =>
@@ -202,28 +203,32 @@ export default function EditorWorkspacePage() {
     [novelId, activeChapter, chapterTitle]
   );
 
-  // Toggle publish
-  const togglePublish = useCallback(async () => {
-    if (!activeChapter || !editor) return;
-    setSaving(true);
-    try {
-      const res = await chaptersApi.save(novelId, activeChapter.id, {
-        title: chapterTitle,
-        content: editor.getJSON(),
-        content_text: editor.getText(),
-        is_public: !activeChapter.is_public,
-      });
-      setActiveChapter(res.data);
-      setChapters((prev) =>
-        prev.map((ch) => (ch.id === res.data.id ? res.data : ch))
-      );
-      setLastSaved(new Date());
-    } catch (err) {
-      console.error("Failed to toggle publish:", err);
-    } finally {
-      setSaving(false);
-    }
-  }, [novelId, activeChapter, chapterTitle, editor]);
+  // Set publish state (비공개 / 공개 / 예약)
+  const setPublishState = useCallback(
+    async (isPublic: boolean, scheduledAt: string | null) => {
+      if (!activeChapter || !editor) return;
+      setSaving(true);
+      try {
+        const res = await chaptersApi.save(novelId, activeChapter.id, {
+          title: chapterTitle,
+          content: editor.getJSON(),
+          content_text: editor.getText(),
+          is_public: isPublic,
+          scheduled_at: scheduledAt,
+        });
+        setActiveChapter(res.data);
+        setChapters((prev) =>
+          prev.map((ch) => (ch.id === res.data.id ? res.data : ch))
+        );
+        setLastSaved(new Date());
+      } catch (err) {
+        console.error("Failed to set publish state:", err);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [novelId, activeChapter, chapterTitle, editor]
+  );
 
   // Delete chapter
   const confirmDelete = useCallback(async () => {
@@ -324,7 +329,8 @@ export default function EditorWorkspacePage() {
             saving={saving}
             lastSaved={lastSaved}
             isPublic={activeChapter?.is_public ?? false}
-            onTogglePublish={togglePublish}
+            scheduledAt={activeChapter?.scheduled_at ?? null}
+            onPublishStateChange={setPublishState}
             macros={macros}
             novelId={novelId}
           />

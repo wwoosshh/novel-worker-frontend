@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { Editor } from "@tiptap/react";
 import { EditorContent } from "@tiptap/react";
 import { EditorToolbar } from "./EditorToolbar";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Clock, ChevronUp } from "lucide-react";
 import type { Chapter, Macro } from "@/lib/api";
 import { executeMacro } from "@/lib/macroExecutor";
 
@@ -17,7 +17,8 @@ interface NovelEditorProps {
   saving: boolean;
   lastSaved: Date | null;
   isPublic: boolean;
-  onTogglePublish: () => void;
+  scheduledAt: string | null;
+  onPublishStateChange: (isPublic: boolean, scheduledAt: string | null) => void;
   macros?: Macro[];
   novelId?: string;
 }
@@ -40,7 +41,8 @@ export function NovelEditor({
   saving,
   lastSaved,
   isPublic,
-  onTogglePublish,
+  scheduledAt,
+  onPublishStateChange,
   macros = [],
   novelId,
 }: NovelEditorProps) {
@@ -48,6 +50,9 @@ export function NovelEditor({
   saveRef.current = onSave;
 
   const [charCount, setCharCount] = useState(0);
+  const [publishMenuOpen, setPublishMenuOpen] = useState(false);
+  const [scheduleInput, setScheduleInput] = useState("");
+  const publishMenuRef = useRef<HTMLDivElement>(null);
 
   // Load chapter content when chapter changes
   useEffect(() => {
@@ -123,6 +128,35 @@ export function NovelEditor({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // 팝오버 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!publishMenuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (publishMenuRef.current && !publishMenuRef.current.contains(e.target as Node)) {
+        setPublishMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [publishMenuOpen]);
+
+  // 예약 상태 표시 헬퍼
+  const publishStatus = isPublic
+    ? "public"
+    : scheduledAt
+      ? "scheduled"
+      : "private";
+
+  const formatScheduledDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleString("ko-KR", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   if (!chapter) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -191,21 +225,113 @@ export function NovelEditor({
               : "저장되지 않음"}
           </span>
           <span className="text-[10px]" style={{ color: "#E8E2D9" }}>|</span>
-          <button
-            onClick={onTogglePublish}
-            disabled={saving}
-            className="flex items-center gap-1 text-[10px] font-medium transition-colors"
-            style={{ color: isPublic ? "#2D7A3A" : "#8A8478" }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            {isPublic ? (
-              <Eye className="h-3 w-3" />
-            ) : (
-              <EyeOff className="h-3 w-3" />
+          <div className="relative" ref={publishMenuRef}>
+            <button
+              onClick={() => setPublishMenuOpen((v) => !v)}
+              disabled={saving}
+              className="flex items-center gap-1 text-[10px] font-medium transition-colors"
+              style={{
+                color: publishStatus === "public"
+                  ? "#2D7A3A"
+                  : publishStatus === "scheduled"
+                    ? "#D97706"
+                    : "#8A8478",
+              }}
+            >
+              {publishStatus === "public" && <Eye className="h-3 w-3" />}
+              {publishStatus === "scheduled" && <Clock className="h-3 w-3" />}
+              {publishStatus === "private" && <EyeOff className="h-3 w-3" />}
+              {publishStatus === "public" && "공개"}
+              {publishStatus === "scheduled" && formatScheduledDate(scheduledAt!)}
+              {publishStatus === "private" && "비공개"}
+              <ChevronUp className="h-2.5 w-2.5" />
+            </button>
+
+            {publishMenuOpen && (
+              <div
+                className="absolute bottom-full left-0 mb-1 w-56 rounded-md shadow-lg py-1 z-50"
+                style={{ backgroundColor: "#FDFBF7", border: "1px solid #E8E2D9" }}
+              >
+                {/* 비공개 */}
+                <button
+                  onClick={() => {
+                    onPublishStateChange(false, null);
+                    setPublishMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-colors"
+                  style={{
+                    color: publishStatus === "private" ? "#1A1814" : "#6B6560",
+                    backgroundColor: publishStatus === "private" ? "#F5F1EB" : "transparent",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F5F1EB")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = publishStatus === "private" ? "#F5F1EB" : "transparent")}
+                >
+                  <EyeOff className="h-3.5 w-3.5 shrink-0" style={{ color: "#8A8478" }} />
+                  비공개
+                </button>
+
+                {/* 공개 */}
+                <button
+                  onClick={() => {
+                    onPublishStateChange(true, null);
+                    setPublishMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-colors"
+                  style={{
+                    color: publishStatus === "public" ? "#1A1814" : "#6B6560",
+                    backgroundColor: publishStatus === "public" ? "#F5F1EB" : "transparent",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F5F1EB")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = publishStatus === "public" ? "#F5F1EB" : "transparent")}
+                >
+                  <Eye className="h-3.5 w-3.5 shrink-0" style={{ color: "#2D7A3A" }} />
+                  즉시 공개
+                </button>
+
+                {/* 예약 공개 */}
+                <div
+                  className="px-3 py-2"
+                  style={{
+                    backgroundColor: publishStatus === "scheduled" ? "#F5F1EB" : "transparent",
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Clock className="h-3.5 w-3.5 shrink-0" style={{ color: "#D97706" }} />
+                    <span className="text-xs" style={{ color: publishStatus === "scheduled" ? "#1A1814" : "#6B6560" }}>
+                      예약 공개
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="datetime-local"
+                      value={scheduleInput}
+                      onChange={(e) => setScheduleInput(e.target.value)}
+                      className="flex-1 h-7 px-2 text-[11px] rounded-sm bg-white outline-none"
+                      style={{ border: "1px solid #E8E2D9", color: "#1A1814" }}
+                      min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                    />
+                    <button
+                      onClick={() => {
+                        if (!scheduleInput) return;
+                        const iso = new Date(scheduleInput).toISOString();
+                        onPublishStateChange(false, iso);
+                        setPublishMenuOpen(false);
+                        setScheduleInput("");
+                      }}
+                      disabled={!scheduleInput}
+                      className="h-7 px-2.5 text-[11px] font-medium rounded-sm transition-colors shrink-0"
+                      style={{
+                        backgroundColor: scheduleInput ? "#D97706" : "#E8E2D9",
+                        color: scheduleInput ? "#FFFFFF" : "#8A8478",
+                      }}
+                    >
+                      설정
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
-            {isPublic ? "공개" : "비공개"}
-          </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

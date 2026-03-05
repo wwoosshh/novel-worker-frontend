@@ -139,13 +139,19 @@ export function ChapterSidebar({
                   >
                     {ch.title || "제목 없음"}
                   </span>
-                  {ch.is_public && (
+                  {ch.is_public ? (
                     <span
                       className="shrink-0 ml-auto w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: "#2D7A3A" }}
                       title="공개"
                     />
-                  )}
+                  ) : ch.scheduled_at ? (
+                    <span
+                      className="shrink-0 ml-auto w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: "#D97706" }}
+                      title={`예약: ${new Date(ch.scheduled_at).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}`}
+                    />
+                  ) : null}
                 </button>
                 <button
                   onClick={(e) => {
