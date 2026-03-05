@@ -379,7 +379,7 @@ export function DbQuickPanel({ novelId, editor }: DbQuickPanelProps) {
             <button
               key={tab.type}
               onClick={() => { setActiveType(tab.type); closeForm(); }}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-sm text-[10px] font-medium transition-all flex-1 justify-center"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-sm text-[10px] font-medium transition-all flex-1 justify-center whitespace-nowrap min-w-0 overflow-hidden"
               style={{
                 backgroundColor: isActive ? "rgba(212,75,32,0.08)" : "transparent",
                 color: isActive ? "#D44B20" : "#8A8478",
@@ -387,7 +387,7 @@ export function DbQuickPanel({ novelId, editor }: DbQuickPanelProps) {
               title={`${tab.label} (${count})`}
             >
               {tab.icon}
-              <span className="hidden xl:inline">{tab.label}</span>
+              <span className="hidden xl:inline truncate">{tab.label}</span>
               {count > 0 && (
                 <span
                   className="text-[8px] ml-0.5"

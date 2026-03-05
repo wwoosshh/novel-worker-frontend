@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background -->
+  <rect width="512" height="512" rx="96" fill="#1A1814"/>
+
+  <!-- Diagonal pen stroke (accent, rendered first so verticals overlay) -->
+  <polygon points="130,128 178,128 382,384 334,384" fill="#D44B20"/>
+
+  <!-- Left vertical stroke -->
+  <rect x="130" y="128" width="48" height="256" fill="#EDE8DC"/>
+  <!-- Left top serif -->
+  <rect x="118" y="120" width="72" height="16" rx="2" fill="#EDE8DC"/>
+  <!-- Left bottom serif -->
+  <rect x="118" y="376" width="72" height="16" rx="2" fill="#EDE8DC"/>
+
+  <!-- Right vertical stroke -->
+  <rect x="334" y="128" width="48" height="256" fill="#EDE8DC"/>
+  <!-- Right top serif -->
+  <rect x="322" y="120" width="72" height="16" rx="2" fill="#EDE8DC"/>
+  <!-- Right bottom serif -->
+  <rect x="322" y="376" width="72" height="16" rx="2" fill="#EDE8DC"/>
+</svg>
