@@ -148,6 +148,18 @@ export interface DbEntry {
   created_at: string;
 }
 
+export interface CalendarChapter {
+  id: string;
+  novel_id: string;
+  number: number;
+  title: string;
+  is_public: boolean;
+  scheduled_at: string | null;
+  created_at: string;
+  updated_at: string;
+  novel_title: string;
+}
+
 /* ─── Novels API ─────────────────────────────────────── */
 
 export interface NovelsParams {
@@ -223,6 +235,13 @@ export const chaptersApi = {
 
   delete(novelId: string, id: string) {
     return apiFetch<{ message: string }>(`/api/novels/${novelId}/chapters/${id}`, { method: "DELETE" });
+  },
+
+  updateSchedule(novelId: string, id: string, data: { is_public: boolean; scheduled_at: string | null }) {
+    return apiFetch<{ data: Chapter }>(`/api/novels/${novelId}/chapters/${id}/schedule`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
   },
 };
 
@@ -366,5 +385,9 @@ export const usersApi = {
 
   unsubscribe(novelId: string) {
     return apiFetch<{ message: string }>(`/api/users/me/subscriptions/${novelId}`, { method: "DELETE" });
+  },
+
+  calendar() {
+    return apiFetch<{ data: CalendarChapter[]; novels: { id: string; title: string }[] }>(`/api/users/me/calendar`);
   },
 };
