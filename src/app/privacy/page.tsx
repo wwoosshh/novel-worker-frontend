@@ -90,7 +90,7 @@ export default function PrivacyPage() {
               style={{ backgroundColor: "#F5F1EB", border: "1px solid #E8E2D9" }}
             >
               <p className="text-sm"><strong style={{ color: "#1A1814" }}>담당</strong>: NovelWorker 운영팀</p>
-              <p className="text-sm"><strong style={{ color: "#1A1814" }}>이메일</strong>: privacy@novelworker.com</p>
+              <p className="text-sm"><strong style={{ color: "#1A1814" }}>이메일</strong>: nunconnect1@gmail.com</p>
             </div>
           </Section>
 

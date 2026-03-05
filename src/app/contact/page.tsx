@@ -36,11 +36,11 @@ export default function ContactPage() {
                 일반 문의, 버그 신고, 제휴 제안 등 모든 문의를 받고 있습니다.
               </p>
               <a
-                href="mailto:support@novelworker.com"
+                href="mailto:nunconnect1@gmail.com"
                 className="text-sm font-medium transition-colors"
                 style={{ color: "#D44B20" }}
               >
-                support@novelworker.com
+                nunconnect1@gmail.com
               </a>
             </div>
           </div>
@@ -62,11 +62,11 @@ export default function ContactPage() {
                 신고 시 관련 URL과 구체적인 내용을 함께 보내주시면 빠르게 처리됩니다.
               </p>
               <a
-                href="mailto:report@novelworker.com"
+                href="mailto:nunconnect1@gmail.com"
                 className="text-sm font-medium transition-colors"
                 style={{ color: "#D44B20" }}
               >
-                report@novelworker.com
+                nunconnect1@gmail.com
               </a>
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function ContactPage() {
               { q: "회원 탈퇴는 어떻게 하나요?", a: "마이페이지 > 프로필 설정에서 탈퇴를 진행할 수 있습니다." },
               { q: "연재한 소설을 삭제하고 싶어요.", a: "연재 관리 > 소설 설정에서 소설 삭제가 가능합니다. 삭제된 소설은 복구할 수 없습니다." },
               { q: "비밀번호를 잊어버렸어요.", a: "로그인 페이지에서 '비밀번호 찾기'를 통해 재설정할 수 있습니다." },
-              { q: "다른 작가의 작품이 제 저작물을 침해하고 있어요.", a: "report@novelworker.com으로 해당 작품 URL과 원본 증거를 함께 보내주세요." },
+              { q: "다른 작가의 작품이 제 저작물을 침해하고 있어요.", a: "nunconnect1@gmail.com으로 해당 작품 URL과 원본 증거를 함께 보내주세요." },
             ].map((faq) => (
               <div key={faq.q}>
                 <p className="text-sm font-medium" style={{ color: "#1A1814" }}>
