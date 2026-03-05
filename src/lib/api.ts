@@ -361,6 +361,79 @@ export const commentsApi = {
   },
 };
 
+/* ─── Feedback API ──────────────────────────────────────── */
+
+export interface FeedbackPost {
+  id: string;
+  author_id: string;
+  title: string;
+  content: string;
+  author_name: string;
+  author_username: string;
+  comment_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeedbackComment {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  author_name: string;
+  author_username: string;
+  created_at: string;
+}
+
+export const feedbackApi = {
+  list(params?: { limit?: number; offset?: number }) {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.offset) qs.set("offset", String(params.offset));
+    const q = qs.toString();
+    return apiFetch<{ data: FeedbackPost[]; total: number }>(`/api/feedback${q ? `?${q}` : ""}`);
+  },
+
+  get(postId: string) {
+    return apiFetch<{ data: FeedbackPost }>(`/api/feedback/${postId}`);
+  },
+
+  create(data: { title: string; content: string }) {
+    return apiFetch<{ data: FeedbackPost }>(`/api/feedback`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  update(postId: string, data: { title: string; content: string }) {
+    return apiFetch<{ data: FeedbackPost }>(`/api/feedback/${postId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  delete(postId: string) {
+    return apiFetch<{ message: string }>(`/api/feedback/${postId}`, { method: "DELETE" });
+  },
+
+  comments(postId: string) {
+    return apiFetch<{ data: FeedbackComment[] }>(`/api/feedback/${postId}/comments`);
+  },
+
+  addComment(postId: string, data: { content: string }) {
+    return apiFetch<{ data: FeedbackComment }>(`/api/feedback/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteComment(postId: string, commentId: string) {
+    return apiFetch<{ message: string }>(`/api/feedback/${postId}/comments/${commentId}`, {
+      method: "DELETE",
+    });
+  },
+};
+
 /* ─── Users API ──────────────────────────────────────── */
 
 export const usersApi = {

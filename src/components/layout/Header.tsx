@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { Search, PenLine, User, Menu, X } from "lucide-react";
+import { Search, PenLine, User, Menu, X, MessageSquare } from "lucide-react";
 
 const GENRE_NAV = [
   { label: "판타지", href: "/search?genre=판타지" },
@@ -160,6 +160,19 @@ export function Header() {
 
             {/* Right actions */}
             <div className="ml-auto flex items-center gap-1">
+              <Link
+                href="/feedback"
+                className="hidden sm:flex items-center gap-1.5 h-8 px-3 text-sm rounded-md transition-all"
+                style={{
+                  color: pathname.startsWith("/feedback") ? "#D44B20" : "#6B6560",
+                  backgroundColor: pathname.startsWith("/feedback") ? "rgba(212,75,32,0.08)" : "transparent",
+                }}
+                onMouseEnter={(e) => { if (!pathname.startsWith("/feedback")) e.currentTarget.style.color = "#1A1814"; }}
+                onMouseLeave={(e) => { if (!pathname.startsWith("/feedback")) e.currentTarget.style.color = "#6B6560"; }}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                개발문의
+              </Link>
               {loading ? (
                 <div className="h-8 w-20 rounded-md animate-pulse" style={{ backgroundColor: "#F5F1EB" }} />
               ) : isLoggedIn ? (
@@ -261,6 +274,18 @@ export function Header() {
                 />
               </div>
             </form>
+            <Link
+              href="/feedback"
+              className="flex items-center gap-1.5 h-9 px-3 text-sm rounded-md"
+              style={{
+                color: pathname.startsWith("/feedback") ? "#D44B20" : "#6B6560",
+                backgroundColor: pathname.startsWith("/feedback") ? "rgba(212,75,32,0.08)" : "#F5F1EB",
+              }}
+              onClick={() => setMobileOpen(false)}
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+              개발문의
+            </Link>
             {!isLoggedIn ? (
               <div className="flex gap-2 pt-1">
                 <Link
