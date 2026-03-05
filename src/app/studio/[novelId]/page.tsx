@@ -52,6 +52,47 @@ export default function EditorWorkspacePage() {
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
 
+  // Resizable right panel
+  const [rightWidth, setRightWidth] = useState(208);
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("nw-right-panel-width");
+    if (saved) {
+      const w = Number(saved);
+      if (w >= 180 && w <= 480) setRightWidth(w);
+    }
+  }, []);
+
+  const startResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragRef.current = { startX: e.clientX, startWidth: rightWidth };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return;
+      const delta = dragRef.current.startX - ev.clientX;
+      const newWidth = Math.min(480, Math.max(180, dragRef.current.startWidth + delta));
+      setRightWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      setRightWidth((w) => {
+        localStorage.setItem("nw-right-panel-width", String(w));
+        return w;
+      });
+      dragRef.current = null;
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [rightWidth]);
+
   // Ref to avoid stale closure in editorProps handlers
   const activeChapterRef = useRef(activeChapter);
   activeChapterRef.current = activeChapter;
@@ -336,11 +377,18 @@ export default function EditorWorkspacePage() {
           />
         </div>
 
-        {/* Right sidebar — desktop */}
+        {/* Right sidebar — desktop, resizable */}
         <div
-          className="hidden lg:flex w-52 shrink-0 border-l flex-col"
-          style={{ borderColor: "#E8E2D9" }}
+          className="hidden lg:flex shrink-0 border-l flex-col relative"
+          style={{ borderColor: "#E8E2D9", width: rightWidth }}
         >
+          <div
+            className="absolute left-0 top-0 h-full w-1 cursor-col-resize z-10"
+            style={{ backgroundColor: "transparent" }}
+            onMouseDown={startResize}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(212,75,32,0.2)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+          />
           <DbQuickPanel novelId={novelId} editor={editor} />
         </div>
       </div>
